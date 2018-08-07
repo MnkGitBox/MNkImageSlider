@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'MNkImageSlider_Example' do
+  pod 'MNkImageSlider', :path => '../'
+
+  target 'MNkImageSlider_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

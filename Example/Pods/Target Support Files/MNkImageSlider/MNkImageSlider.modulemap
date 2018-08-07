@@ -1,0 +1,6 @@
+framework module MNkImageSlider {
+  umbrella header "MNkImageSlider-umbrella.h"
+
+  export *
+  module * { export * }
+}

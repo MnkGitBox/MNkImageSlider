@@ -1,0 +1,6 @@
+framework module Pods_MNkImageSlider_Example {
+  umbrella header "Pods-MNkImageSlider_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

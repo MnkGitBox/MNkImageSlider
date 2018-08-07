@@ -7,18 +7,19 @@
 //
 
 import UIKit
+import MNkImageSlider
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var imageSliderStoryBoard: MNkImageSlider!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        imageSliderStoryBoard.imagesData = [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile")]
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+    
+    
 }
 
+ 

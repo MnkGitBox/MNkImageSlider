@@ -1,0 +1,25 @@
+PODS:
+  - MNkImageSlider (0.1.0):
+    - SDWebImage
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
+
+DEPENDENCIES:
+  - MNkImageSlider (from `../`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - SDWebImage
+
+EXTERNAL SOURCES:
+  MNkImageSlider:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  MNkImageSlider: cb4a61a695086ba23f1bb21a3d9bfd61d0de6d64
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
+
+PODFILE CHECKSUM: 14cd916d6fcd3fb020077f832b8cea96b4224be0
+
+COCOAPODS: 1.5.3

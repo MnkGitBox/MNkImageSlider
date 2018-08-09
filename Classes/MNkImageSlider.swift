@@ -5,12 +5,27 @@
 //  Copyright © 2017 MNkApps. All rights reserved.
 //
 
+public protocol MNkSliderCompatable{
+    var imageUrl:URL?{get}
+    var link:URL?{get}
+}
 open class MNkImageSlider: UIView {
     
     fileprivate let sliderCell = "sliderCell"
     public var imagesData:[Any] = []{
         didSet{
             reloadData()
+        }
+    }
+    
+    public var indicatorSelectColor:UIColor = .black
+    public var indicatorUnselectColor:UIColor = .white
+    
+    //TODO:- need to set slider indicator inside scrollview and change this as uiedge inserts
+    public var indicatorBottomInsets:CGFloat = -8{
+        didSet{
+            indicatorBottomConstant?.constant = indicatorBottomInsets
+            layoutIfNeeded()
         }
     }
     
@@ -53,6 +68,8 @@ open class MNkImageSlider: UIView {
         return view
     }()
     
+    private var indicatorBottomConstant:NSLayoutConstraint?
+    
     private func performLayoutSubViews(){
         
         NSLayoutConstraint.activate([sliderImageCollectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -61,7 +78,8 @@ open class MNkImageSlider: UIView {
                                      sliderImageCollectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
         
         indicatorHolderStackView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        indicatorHolderStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -8).isActive = true
+        indicatorBottomConstant = indicatorHolderStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
+        indicatorBottomConstant?.isActive = true
         
         indicatorBackgroundView.leadingAnchor.constraint(equalTo: indicatorHolderStackView.leadingAnchor,constant:-4).isActive = true
         indicatorBackgroundView.trailingAnchor.constraint(equalTo: indicatorHolderStackView.trailingAnchor,constant:4).isActive = true
@@ -94,23 +112,36 @@ open class MNkImageSlider: UIView {
         let indicators = indicatorHolderStackView.subviews
         indicators.forEach { indicator in
             if indicator.tag == index{
-                selectionOn(of: indicator)
+                //                selectionOn(of: indicator)
+                selectIndicator(true, of: indicator)
             }else{
-                selectionOff(of: indicator)
+                //                selectionOff(of: indicator)
+                selectIndicator(false, of: indicator)
             }
         }
     }
     
-    private func selectionOn(of indicator:UIView){
+    //    private func selectionOn(of indicator:UIView){
+    //        UIView.animate(withDuration: 0.4) {
+    //            indicator.backgroundColor = .black
+    //            indicator.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+    //        }
+    //    }
+    //    private func selectionOff(of indicator:UIView){
+    //        UIView.animate(withDuration: 0.4) {
+    //            indicator.backgroundColor = .white
+    //            indicator.transform = .identity
+    //        }
+    //    }
+    
+    private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView){
+        
+        let transform = isSelect ? CGAffineTransform(scaleX: 1.2, y: 1.2) : .identity
+        let color = isSelect ? indicatorSelectColor : indicatorUnselectColor
+        
         UIView.animate(withDuration: 0.4) {
-            indicator.backgroundColor = .black
-            indicator.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
-        }
-    }
-    private func selectionOff(of indicator:UIView){
-        UIView.animate(withDuration: 0.4) {
-            indicator.backgroundColor = .white
-            indicator.transform = .identity
+            indicatorView.backgroundColor = color
+            indicatorView.transform = transform
         }
     }
     

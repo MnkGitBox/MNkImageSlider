@@ -19,9 +19,9 @@ class SliderCVCell:UICollectionViewCell{
                 let url = URL(string: _imgUrlString)
                 imageView.sd_setImage(with: url, placeholderImage: nil, options: [], completed: nil)
             }
-//            if let sliderData = imageData as? HomeFeedData.SliderOb{
-//                imageView.sd_setImage(with: sliderData.imgUrl, placeholderImage: UIImage(), options: [], completed: nil)
-//            }
+            if let _sliderData = imageData as? MNkSliderCompatable{
+                imageView.sd_setImage(with: _sliderData.imageUrl, placeholderImage: nil, options: [], completed: nil)
+            }
         }
     }
     

@@ -22,7 +22,7 @@ pod 'MNkImageSlider'
 
 ## Author
 
-Malith Nadeeshan, malith.mnk93@gmail.com
+Malith Nadeeshan, malith.mnk93@gmail.com, malith@azbow.com
 
 ## License
 

@@ -20,6 +20,11 @@ open class MNkImageSlider: UIView {
     
     public var indicatorSelectColor:UIColor = .black
     public var indicatorUnselectColor:UIColor = .white
+    public var isIndicatorBackgroundVisible = true{
+        didSet{
+            indicatorBackgroundView.isHidden = !isIndicatorBackgroundVisible
+        }
+    }
     
     //TODO:- need to set slider indicator inside scrollview and change this as uiedge inserts
     public var indicatorBottomInsets:CGFloat = -8{

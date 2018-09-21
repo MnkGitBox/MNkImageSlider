@@ -9,6 +9,12 @@ public protocol MNkSliderCompatable{
     var imageUrl:URL?{get}
     var link:URL?{get}
 }
+
+public protocol MNkSliderDelegate{
+    func userScrolled(_ sliderData:Any?)
+}
+
+
 open class MNkImageSlider: UIView {
     
     fileprivate let sliderCell = "sliderCell"
@@ -17,6 +23,7 @@ open class MNkImageSlider: UIView {
             reloadData()
         }
     }
+    public var delegate:MNkSliderDelegate?
     
     public var indicatorSelectColor:UIColor = .black
     public var indicatorUnselectColor:UIColor = .white
@@ -26,11 +33,29 @@ open class MNkImageSlider: UIView {
         }
     }
     
+    public var sliderBackgroundColor:UIColor = .white{
+        didSet{
+            self.backgroundColor = sliderBackgroundColor
+            sliderImageCollectionView.backgroundColor = sliderBackgroundColor
+        }
+    }
+    
     //TODO:- need to set slider indicator inside scrollview and change this as uiedge inserts
     public var indicatorBottomInsets:CGFloat = -8{
         didSet{
             indicatorBottomConstant?.constant = indicatorBottomInsets
             layoutIfNeeded()
+        }
+    }
+    
+    public var sliderInsets:UIEdgeInsets = .zero{
+        didSet{
+            sliderImageCollectionView.reloadData()
+        }
+    }
+    public var imageContentMode:UIViewContentMode = .scaleAspectFill{
+        didSet{
+            sliderImageCollectionView.reloadData()
         }
     }
     
@@ -194,7 +219,11 @@ open class MNkImageSlider: UIView {
         sliderImageCollectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
         
         performLayoutSubViews()
-        
+    }
+    
+    private func sendSelectedData(){
+        guard let visibleCell = sliderImageCollectionView.visibleCells.first as? SliderCVCell else{return}
+        delegate?.userScrolled(visibleCell.imageData)
     }
     
 }
@@ -202,14 +231,19 @@ open class MNkImageSlider: UIView {
 
 extension MNkImageSlider:UIScrollViewDelegate{
     
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        guard !decelerate else{return}
+        sendSelectedData()
+    }
+    
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        sendSelectedData()
         
         let index:Int = Int(scrollView.contentOffset.x / (scrollView.contentSize.width / CGFloat(imagesData.count)))
         guard index != currImgIndex else{return}
         currImgIndex = index
         startAnimationIndicator(at: currImgIndex)
     }
-    
     
 }
 
@@ -221,6 +255,8 @@ extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlo
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as! SliderCVCell
         cell.imageData = imagesData[indexPath.item]
+        cell.sliderInset = sliderInsets
+        cell.imageContentMode = imageContentMode
         return cell
     }
     
@@ -228,6 +264,7 @@ extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlo
         let size = collectionView.bounds.size
         return size
     }
+    
     
     
 }

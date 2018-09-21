@@ -25,6 +25,18 @@ class SliderCVCell:UICollectionViewCell{
         }
     }
     
+    var sliderInset:UIEdgeInsets = .zero{
+        didSet{
+            updateInset()
+        }
+    }
+    
+    var imageContentMode:UIViewContentMode = .scaleAspectFill{
+        didSet{
+            imageView.contentMode = imageContentMode
+        }
+    }
+    
     private let imageView:UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
@@ -33,19 +45,42 @@ class SliderCVCell:UICollectionViewCell{
         return iv
     }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
+    private var leadingConstant:NSLayoutConstraint?
+    private var tralingConstant:NSLayoutConstraint?
+    private var topConstant:NSLayoutConstraint?
+    private var bottomConstant:NSLayoutConstraint?
+    
+    private func insertAndLayoutSubviews(){
         addSubview(imageView)
         
-        NSLayoutConstraint.activate([imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                                     imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-                                     imageView.topAnchor.constraint(equalTo: topAnchor),
-                                     imageView.bottomAnchor.constraint(equalTo: bottomAnchor)])
+        leadingConstant = imageView.leadingAnchor.constraint(equalTo: leadingAnchor,constant:sliderInset.left)
+        tralingConstant = imageView.trailingAnchor.constraint(equalTo: trailingAnchor,constant:-sliderInset.right)
+        topConstant = imageView.topAnchor.constraint(equalTo: topAnchor,constant:sliderInset.top)
+        bottomConstant = imageView.bottomAnchor.constraint(equalTo: bottomAnchor,constant:-sliderInset.bottom)
+        
+        leadingConstant?.isActive = true
+        tralingConstant?.isActive = true
+        topConstant?.isActive = true
+        bottomConstant?.isActive = true
+    }
+    
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        insertAndLayoutSubviews()
+        backgroundColor = .clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func updateInset(){
+        leadingConstant?.constant = sliderInset.left
+        tralingConstant?.constant = -sliderInset.right
+        topConstant?.constant = sliderInset.top
+        bottomConstant?.constant = -sliderInset.bottom
+        self.layoutIfNeeded()
     }
     
 }

@@ -13,14 +13,14 @@ class SliderCVCell:UICollectionViewCell{
                 imageView.image = _image
             }
             if let _imageUrl = imageData as? URL{
-                imageView.sd_setImage(with: _imageUrl, placeholderImage: UIImage(), options: [], completed: nil)
+                imageView.sd_setImage(with: _imageUrl, placeholderImage: placeHolder, options: [], completed: nil)
             }
             if let _imgUrlString = imageData as? String{
                 let url = URL(string: _imgUrlString)
-                imageView.sd_setImage(with: url, placeholderImage: nil, options: [], completed: nil)
+                imageView.sd_setImage(with: url, placeholderImage: placeHolder, options: [], completed: nil)
             }
             if let _sliderData = imageData as? MNkSliderCompatable{
-                imageView.sd_setImage(with: _sliderData.imageUrl, placeholderImage: nil, options: [], completed: nil)
+                imageView.sd_setImage(with: _sliderData.imageUrl, placeholderImage: placeHolder, options: [], completed: nil)
             }
         }
     }
@@ -36,6 +36,8 @@ class SliderCVCell:UICollectionViewCell{
             imageView.contentMode = imageContentMode
         }
     }
+    
+    var placeHolder:UIImage?
     
     private let imageView:UIImageView = {
         let iv = UIImageView()

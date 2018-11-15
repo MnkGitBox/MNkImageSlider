@@ -61,6 +61,8 @@ open class MNkImageSlider: UIView {
     
     fileprivate var currImgIndex:Int = 0
     
+     private var placeHolder:UIImage?
+    
     private lazy var sliderImageCollectionView:UICollectionView = {
         
         let layout = UICollectionViewFlowLayout()
@@ -195,7 +197,8 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    override public init(frame: CGRect) {
+    public init(frame:CGRect = .zero,_ placeHolder:UIImage? = nil) {
+        self.placeHolder = placeHolder
         super.init(frame: frame)
         
         addSubview(sliderImageCollectionView)
@@ -257,6 +260,7 @@ extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlo
         cell.imageData = imagesData[indexPath.item]
         cell.sliderInset = sliderInsets
         cell.imageContentMode = imageContentMode
+        cell.placeHolder = placeHolder
         return cell
     }
     

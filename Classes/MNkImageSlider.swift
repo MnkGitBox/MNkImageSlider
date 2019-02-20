@@ -102,6 +102,57 @@ open class MNkImageSlider: UIView {
     
     private var indicatorBottomConstant:NSLayoutConstraint?
     
+    
+    
+    //------------------------------------------------------------------------------------------------------------------
+    
+    public var delay = TimeInterval(5)
+    
+    private var timer:Timer?
+    
+    private var itemWidth:CGFloat{
+        return sliderImageCollectionView.bounds.size.width + flowLayout.minimumInteritemSpacing
+    }
+    private var contentOffSetY:CGFloat{
+        return sliderImageCollectionView.contentOffset.y
+    }
+    private var contentOffSetX:CGFloat{
+        return sliderImageCollectionView.contentOffset.x
+    }
+    private var itemsWidth:CGFloat{
+        return sliderImageCollectionView.contentSize.width
+    }
+    private var isLastItem:Bool{
+        return nextContentOffSetX == 0.0
+    }
+    private var flowLayout:UICollectionViewFlowLayout{
+        return sliderImageCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
+    }
+    
+    private var nextContentOffSetX:CGFloat{
+        let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
+        let nextCoOffSet = (contentOffSetX - remain) + itemWidth
+        guard nextCoOffSet < itemsWidth else {
+            return 0.0
+        }
+        return nextCoOffSet
+    }
+
+    
+    
+    public func startSliderAnimation(){
+        timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
+    }
+    
+    @objc private func animateCell(){
+        let isAnimate = isLastItem ? false : true
+        if isLastItem{startAnimationIndicator(at: 0)}
+        sliderImageCollectionView.setContentOffset(CGPoint(x: nextContentOffSetX, y: contentOffSetY), animated: isAnimate)
+    }
+    
+    //------------------------------------------------------------------------------------------------------------------
+    
+    
     private func performLayoutSubViews(){
         
         NSLayoutConstraint.activate([sliderImageCollectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -234,14 +285,30 @@ open class MNkImageSlider: UIView {
 
 extension MNkImageSlider:UIScrollViewDelegate{
     
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        timer?.invalidate()
+        timer = nil
+    }
+    
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         guard !decelerate else{return}
         sendSelectedData()
+        startSliderAnimation()
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         sendSelectedData()
+        startSliderAnimation()
         
+       setSelectedPage(inScrollPositionOf: scrollView)
+    }
+    
+    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+         sendSelectedData()
+         setSelectedPage(inScrollPositionOf: scrollView)
+    }
+    
+    private func setSelectedPage(inScrollPositionOf scrollView:UIScrollView){
         let index:Int = Int(scrollView.contentOffset.x / (scrollView.contentSize.width / CGFloat(imagesData.count)))
         guard index != currImgIndex else{return}
         currImgIndex = index

@@ -19,6 +19,11 @@ class ViewController: UIViewController {
         imageSliderStoryBoard.imagesData = [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile")]
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        imageSliderStoryBoard.startSliderAnimation()
+    }
+    
     
 }
 

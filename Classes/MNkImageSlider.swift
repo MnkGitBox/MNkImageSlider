@@ -106,7 +106,21 @@ open class MNkImageSlider: UIView {
     
     //------------------------------------------------------------------------------------------------------------------
     
-    public var delay = TimeInterval(5)
+    public var isRepeat:Bool = false{
+        didSet{
+            sliderImageCollectionView.reloadData()
+        }
+    }
+    
+    public var delay = TimeInterval(5){
+        didSet{
+            guard isAnimating else{return}
+            stopAnimation()
+            startSliderAnimation()
+        }
+    }
+    
+    private var isAnimating:Bool = false
     
     private var timer:Timer?
     
@@ -142,12 +156,19 @@ open class MNkImageSlider: UIView {
     
     public func startSliderAnimation(){
         timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
+        isAnimating = true
     }
     
     @objc private func animateCell(){
         let isAnimate = isLastItem ? false : true
         if isLastItem{startAnimationIndicator(at: 0)}
         sliderImageCollectionView.setContentOffset(CGPoint(x: nextContentOffSetX, y: contentOffSetY), animated: isAnimate)
+    }
+    
+    public func stopAnimation(){
+        timer?.invalidate()
+        timer = nil
+        isAnimating = false
     }
     
     //------------------------------------------------------------------------------------------------------------------
@@ -204,18 +225,7 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    //    private func selectionOn(of indicator:UIView){
-    //        UIView.animate(withDuration: 0.4) {
-    //            indicator.backgroundColor = .black
-    //            indicator.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
-    //        }
-    //    }
-    //    private func selectionOff(of indicator:UIView){
-    //        UIView.animate(withDuration: 0.4) {
-    //            indicator.backgroundColor = .white
-    //            indicator.transform = .identity
-    //        }
-    //    }
+   
     
     private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView){
         
@@ -286,8 +296,7 @@ open class MNkImageSlider: UIView {
 extension MNkImageSlider:UIScrollViewDelegate{
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        timer?.invalidate()
-        timer = nil
+       stopAnimation()
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -309,22 +318,31 @@ extension MNkImageSlider:UIScrollViewDelegate{
     }
     
     private func setSelectedPage(inScrollPositionOf scrollView:UIScrollView){
-        let index:Int = Int(scrollView.contentOffset.x / (scrollView.contentSize.width / CGFloat(imagesData.count)))
+        let index = selectedItemIndex(in: scrollView)
         guard index != currImgIndex else{return}
         currImgIndex = index
         startAnimationIndicator(at: currImgIndex)
+    }
+    
+    private func selectedItemIndex(in scrollView:UIScrollView)->Int{
+        let currScrollIndex = CGFloat(contentOffSetX / itemWidth)
+        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(imagesData.count))
+        return Int(itemIndex)
     }
     
 }
 
 extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        guard !isRepeat else{
+            return imagesData.count * 100
+        }
         return imagesData.count
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as! SliderCVCell
-        cell.imageData = imagesData[indexPath.item]
+        cell.imageData = imagesData[itemIndex(for: indexPath)]
         cell.sliderInset = sliderInsets
         cell.imageContentMode = imageContentMode
         cell.placeHolder = placeHolder
@@ -337,6 +355,17 @@ extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlo
     }
     
     
+    /*..................................................................................
+     Mark:- Get item index acording to current indexPath
+     This for looping sliders countinuesly when user scroll view slider right or left.
+     ...................................................................................*/
+    private func itemIndex(for indexPath:IndexPath)->Int{
+         guard isRepeat else{return indexPath.item}
+        let itemsLoopTimes = CGFloat(indexPath.item / imagesData.count).rounded(.down)
+        let itemsLoopedUnion = CGFloat(imagesData.count) * itemsLoopTimes
+        let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
+        return indexItem
+    }
     
 }
 

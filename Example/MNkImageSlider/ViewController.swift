@@ -22,6 +22,8 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         imageSliderStoryBoard.startSliderAnimation()
+        imageSliderStoryBoard.isRepeat = true
+        imageSliderStoryBoard.delay = 1
     }
     
     

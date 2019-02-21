@@ -29,7 +29,7 @@ open class MNkImageSlider: UIView {
     public var indicatorUnselectColor:UIColor = .white
     public var isIndicatorBackgroundVisible = true{
         didSet{
-            indicatorBackgroundView.isHidden = !isIndicatorBackgroundVisible
+//            indicatorBackgroundView.isHidden = !isIndicatorBackgroundVisible
         }
     }
     
@@ -61,7 +61,9 @@ open class MNkImageSlider: UIView {
     
     fileprivate var currImgIndex:Int = 0
     
-     private var placeHolder:UIImage?
+    private var placeHolder:UIImage?
+    
+    public var indicator:ItemIndicators!
     
     private lazy var sliderImageCollectionView:UICollectionView = {
         
@@ -81,28 +83,7 @@ open class MNkImageSlider: UIView {
         return cv
     }()
     
-    private let indicatorHolderStackView:UIStackView = {
-        let sv = UIStackView()
-        sv.axis = .horizontal
-        sv.distribution = .fill
-        sv.alignment = .fill
-        sv.spacing = 4
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        return sv
-    }()
-    
-    private let indicatorBackgroundView:UIVisualEffectView = {
-        let blurEffectView = UIBlurEffect(style: UIBlurEffectStyle.light)
-        let view = UIVisualEffectView(effect: blurEffectView)
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 4
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
     private var indicatorBottomConstant:NSLayoutConstraint?
-    
-    
     
     //------------------------------------------------------------------------------------------------------------------
     
@@ -155,134 +136,83 @@ open class MNkImageSlider: UIView {
     
     
     public func startSliderAnimation(){
+        guard !imagesData.isEmpty else {return}
         timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
         isAnimating = true
     }
     
     @objc private func animateCell(){
         let isAnimate = isLastItem ? false : true
-        if isLastItem{startAnimationIndicator(at: 0)}
+        if isLastItem{indicator.activeIndex = 0}
         sliderImageCollectionView.setContentOffset(CGPoint(x: nextContentOffSetX, y: contentOffSetY), animated: isAnimate)
     }
     
     public func stopAnimation(){
+        guard isAnimating else{return}
         timer?.invalidate()
         timer = nil
         isAnimating = false
     }
     
-    //------------------------------------------------------------------------------------------------------------------
+    private func createViews(){
+        indicator = ItemIndicators(imagesData.count)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+    }
     
-    
-    private func performLayoutSubViews(){
+    private func insertAndLayoutViews(){
+        addSubview(sliderImageCollectionView)
+        addSubview(indicator)
         
         NSLayoutConstraint.activate([sliderImageCollectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
                                      sliderImageCollectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                                      sliderImageCollectionView.topAnchor.constraint(equalTo: self.topAnchor),
                                      sliderImageCollectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
         
-        indicatorHolderStackView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        indicatorBottomConstant = indicatorHolderStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
+        
+        indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
         indicatorBottomConstant?.isActive = true
+        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
         
-        indicatorBackgroundView.leadingAnchor.constraint(equalTo: indicatorHolderStackView.leadingAnchor,constant:-4).isActive = true
-        indicatorBackgroundView.trailingAnchor.constraint(equalTo: indicatorHolderStackView.trailingAnchor,constant:4).isActive = true
-        indicatorBackgroundView.topAnchor.constraint(equalTo: indicatorHolderStackView.topAnchor,constant:-4).isActive = true
-        indicatorBackgroundView.bottomAnchor.constraint(equalTo: indicatorHolderStackView.bottomAnchor,constant:4).isActive = true
+       
     }
     
-    
-    
-    private func createIndicatorViews(){
-        guard imagesData.count > 1 else{return}
-        var index = 0
-        while index < imagesData.count {
-            let view = UIView()
-            view.clipsToBounds = true
-            view.backgroundColor = .white
-            view.translatesAutoresizingMaskIntoConstraints = false
-            view.layer.cornerRadius = 3
-            view.tag = index
-            indicatorHolderStackView.addArrangedSubview(view)
-            view.widthAnchor.constraint(equalToConstant: 6).isActive = true
-            view.heightAnchor.constraint(equalToConstant: 6).isActive = true
-            index += 1
-        }
-        
-    }
-    
-    
-    fileprivate func startAnimationIndicator(at index:Int){
-        let indicators = indicatorHolderStackView.subviews
-        indicators.forEach { indicator in
-            if indicator.tag == index{
-                //                selectionOn(of: indicator)
-                selectIndicator(true, of: indicator)
-            }else{
-                //                selectionOff(of: indicator)
-                selectIndicator(false, of: indicator)
-            }
-        }
-    }
-    
-   
-    
-    private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView){
-        
-        let transform = isSelect ? CGAffineTransform(scaleX: 1.2, y: 1.2) : .identity
-        let color = isSelect ? indicatorSelectColor : indicatorUnselectColor
-        
-        UIView.animate(withDuration: 0.4) {
-            indicatorView.backgroundColor = color
-            indicatorView.transform = transform
-        }
-    }
+    //------------------------------------------------------------------------------------------------------------------
+
     
     public func reloadData(){
         
         sliderImageCollectionView.reloadData()
         
-        self.indicatorHolderStackView.subviews.forEach { view in
-            view.removeFromSuperview()
-        }
-        createIndicatorViews()
-        startAnimationIndicator(at: currImgIndex)
+        indicator.items = imagesData.count
+        indicator.activeIndex = currImgIndex
     }
     
     func removeAll(){
         imagesData.removeAll()
         imagesData = []
         
-        self.indicatorHolderStackView.subviews.forEach { view in
-            view.removeFromSuperview()
-        }
+//        self.indicatorHolderStackView.subviews.forEach { view in
+//            view.removeFromSuperview()
+//        }
     }
     
     public init(frame:CGRect = .zero,_ placeHolder:UIImage? = nil) {
         self.placeHolder = placeHolder
         super.init(frame: frame)
         
-        addSubview(sliderImageCollectionView)
-        addSubview(indicatorBackgroundView)
-        addSubview(indicatorHolderStackView)
-        
-        
         sliderImageCollectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
         
-        performLayoutSubViews()
+        createViews()
+        insertAndLayoutViews()
         
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder : aDecoder)
-        
-        addSubview(sliderImageCollectionView)
-        addSubview(indicatorBackgroundView)
-        addSubview(indicatorHolderStackView)
-        
         sliderImageCollectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
-        
-        performLayoutSubViews()
+    
+        createViews()
+        insertAndLayoutViews()
     }
     
     private func sendSelectedData(){
@@ -321,7 +251,8 @@ extension MNkImageSlider:UIScrollViewDelegate{
         let index = selectedItemIndex(in: scrollView)
         guard index != currImgIndex else{return}
         currImgIndex = index
-        startAnimationIndicator(at: currImgIndex)
+//        startAnimationIndicator(at: currImgIndex)
+        indicator.activeIndex = currImgIndex
     }
     
     private func selectedItemIndex(in scrollView:UIScrollView)->Int{

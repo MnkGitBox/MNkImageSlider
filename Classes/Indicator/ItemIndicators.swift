@@ -65,7 +65,7 @@ open class ItemIndicators:UIView{
     private var backgroundBlurView:UIVisualEffectView!
     
     private var indicators = [Indicator]()
-    
+   
     
     
     
@@ -209,15 +209,15 @@ open class ItemIndicators:UIView{
     
     
     private func setActiveIndex(){
+        guard !indicators.isEmpty else{return}
         guard let last = lastActiveIndex,
             last != activeIndex
             else{
-                lastActiveIndex = activeIndex
                 let indicator =  indicators[activeIndex]
                 selectIndicator(true, of: indicator, isAnimate: false)
+                lastActiveIndex = activeIndex
                 return
         }
-        
         let unselectIndi = indicators[last]
         let selectIndi = indicators[activeIndex]
         selectIndicator(false, of: unselectIndi)

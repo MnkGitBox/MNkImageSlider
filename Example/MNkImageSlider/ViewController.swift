@@ -21,12 +21,12 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        imageSliderStoryBoard.startSliderAnimation()
+        imageSliderStoryBoard.playSlider()
         imageSliderStoryBoard.isRepeat = true
         imageSliderStoryBoard.delay = 5
         imageSliderStoryBoard.indicator.selectedColor = .red
-        
-        
+        imageSliderStoryBoard.size = .full
+        imageSliderStoryBoard.slider.imageContentMode = .scaleAspectFill
     }
     
     

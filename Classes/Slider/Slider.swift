@@ -35,10 +35,7 @@ public class Slider:UIView{
     }
     public var placeHolder:UIImage?
     
-    
-    
-    
-    
+    var direction:MNkImageSlider.SliderDirection = .forward
     
     
     
@@ -54,8 +51,18 @@ public class Slider:UIView{
     var dataSource:SliderDataSource?
     var delegate:SliderDelegate?
     
+    var size:MNkImageSlider.Sizes = .full{
+        didSet{
+            reloadData()
+        }
+    }
     
-    private let sliderCell = "sliderCell"
+    var isLastItem:Bool{
+        guard direction == .forward else{
+            return nextContentOffSetX == lastContentOffSetForBackward
+        }
+        return nextContentOffSetX == 0.0
+    }
     
     
     
@@ -72,41 +79,42 @@ public class Slider:UIView{
     /*.......................
      Mark:- Private variables
      ........................*/
+    private let sliderCell = "sliderCell"
+    
     private var items:[Any]{
         return dataSource?.itemsForSlider() ?? []
     }
+    
     private var isAnimating:Bool = false
     
     private var itemWidth:CGFloat{
-        return collectionView.bounds.size.width + flowLayout.minimumInteritemSpacing
+        return sliderSizeForSizeClass(from: collectionView.bounds.size).width
     }
+    
     private var contentOffSetY:CGFloat{
         return collectionView.contentOffset.y
     }
+    
     private var contentOffSetX:CGFloat{
         return collectionView.contentOffset.x
     }
+    
     private var itemsWidth:CGFloat{
         return collectionView.contentSize.width
     }
     
-    var isLastItem:Bool{
-        return nextContentOffSetX == 0.0
+    private var directionAttrib:UISemanticContentAttribute{
+        return self.direction == .forward ? UISemanticContentAttribute.forceLeftToRight : .forceRightToLeft
     }
-    private var flowLayout:UICollectionViewFlowLayout{
-        return collectionView.collectionViewLayout as! UICollectionViewFlowLayout
-    }
-    
+ 
     private var nextContentOffSetX:CGFloat{
-        let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
-        let nextCoOffSet = (contentOffSetX - remain) + itemWidth
-        guard nextCoOffSet < itemsWidth else {
-            return 0.0
-        }
-        return nextCoOffSet
+        guard direction == .forward else{return contentOffSetForBackward()}
+        return contentOffSetForForward()
     }
     
-    
+    private var lastContentOffSetForBackward:CGFloat{
+        return collectionView.contentSize.width - collectionView.bounds.size.width
+    }
     
 
     
@@ -116,11 +124,12 @@ public class Slider:UIView{
      Mark:- Create and layout and config views
      .........................................*/
     private func createViews(){
-        let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
-        layout.minimumInteritemSpacing = 0
-        layout.scrollDirection = .horizontal
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        flowLayout.scrollDirection = .horizontal
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.isPagingEnabled = true
@@ -128,7 +137,7 @@ public class Slider:UIView{
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        
+        collectionView.semanticContentAttribute = directionAttrib
         
     }
     private func inserAndLayoutSubviews(){
@@ -145,8 +154,10 @@ public class Slider:UIView{
         backgroundColor = .clear
     }
     
-    init(_ placeHolder:UIImage?) {
+    init(_ direction:MNkImageSlider.SliderDirection,_ size:MNkImageSlider.Sizes,_ placeHolder:UIImage?) {
         self.placeHolder = placeHolder
+        self.size = size
+        self.direction = direction
         super.init(frame: .zero)
         createViews()
         inserAndLayoutSubviews()
@@ -163,9 +174,23 @@ public class Slider:UIView{
     
     
     
+    private func contentOffSetForForward()->CGFloat{
+        let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
+        let nextCoOffSet = (contentOffSetX - remain) + itemWidth
+        guard nextCoOffSet < itemsWidth else {
+            return 0.0
+        }
+        return nextCoOffSet
+    }
     
-    
-    
+    private func contentOffSetForBackward()->CGFloat{
+        let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
+        let nextCoOffSet = (contentOffSetX + remain) - itemWidth
+        guard nextCoOffSet > 0.0 else {
+            return lastContentOffSetForBackward
+        }
+        return nextCoOffSet
+    }
     
     
     
@@ -193,7 +218,9 @@ public class Slider:UIView{
     private func selectedItemIndex(in scrollView:UIScrollView)->Int{
         let currScrollIndex = CGFloat(contentOffSetX / itemWidth)
         let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(items.count))
-        return Int(itemIndex)
+        guard direction == .backward else{return Int(itemIndex)}
+        let backWardIndex = (items.count - 1) - Int(itemIndex)
+        return backWardIndex
     }
     
     
@@ -207,6 +234,19 @@ public class Slider:UIView{
         let itemsLoopedUnion = CGFloat(items.count) * itemsLoopTimes
         let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
         return indexItem
+    }
+    
+    
+    
+    /*...........................................
+     Mark:- Calculate size acording to size class
+     ............................................*/
+    private func sliderSizeForSizeClass(from size:CGSize)->CGSize{
+        let sizeClass = self.size
+        let devider = CGFloat(sizeClass.rawValue)
+        let width = size.width / devider
+        let _size = CGSize(width: width, height: size.height)
+        return _size
     }
     
 }
@@ -286,7 +326,7 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
     }
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = collectionView.bounds.size
+        let size = sliderSizeForSizeClass(from: collectionView.bounds.size)
         return size
     }
     

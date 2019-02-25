@@ -20,6 +20,20 @@ public protocol MNkSliderDelegate{
 
 open class MNkImageSlider: UIView {
     
+    public enum Sizes:Int{
+        case full = 1
+        case two = 2
+        case three = 3
+        case four = 4
+        case five = 5
+    }
+    
+    @objc
+    public enum SliderDirection:Int{
+        case forward = 0
+        case backward = 1
+    }
+    
     
     /*....................................
      Mark:- Public configurable paramters
@@ -38,7 +52,7 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    public var imagesData:[Any] = []{
+   public var imagesData:[Any] = []{
         didSet{
             reloadData()
         }
@@ -46,7 +60,7 @@ open class MNkImageSlider: UIView {
     
     public var delegate:MNkSliderDelegate?
     
-    public var isRepeat:Bool = false{
+    @IBInspectable public var isRepeat:Bool = false{
         didSet{
             slider.isRepeat = isRepeat
         }
@@ -55,23 +69,31 @@ open class MNkImageSlider: UIView {
     public var delay = TimeInterval(5){
         didSet{
             guard isAnimating else{return}
-            stopAnimation()
+            stopSlider()
             startSliderAnimation()
+        }
+    }
+    
+    public var size:Sizes = .full{
+        didSet{
+            slider.size = size
         }
     }
     
     
     
     
-    
-    /*....................................
-     Mark:- private views and parameters
-     .....................................*/
+    /*...................
+     Mark:- public views
+     ....................*/
     public var indicator:ItemIndicators!
     
     public var slider:Slider!
     
 
+    /*....................................
+     Mark:- private  parameters
+     .....................................*/
     private var currImgIndex:Int = 0
     
     private var placeHolder:UIImage?
@@ -80,7 +102,13 @@ open class MNkImageSlider: UIView {
     
     private var isAnimating:Bool = false
     
+    private var isUserStartAnimating:Bool = false
+    
     private var timer:Timer?
+    
+    private var sliderDirection:SliderDirection = .forward
+    
+    
     
     
     
@@ -91,7 +119,7 @@ open class MNkImageSlider: UIView {
      Mark:- Create layout and configure views
      .......................................*/
     private func createViews(){
-        slider = Slider(placeHolder)
+        slider = Slider(sliderDirection, size, placeHolder)
         slider.dataSource = self
         slider.delegate = self
         slider.translatesAutoresizingMaskIntoConstraints = false
@@ -116,8 +144,10 @@ open class MNkImageSlider: UIView {
        
     }
     
-    public init(frame:CGRect = .zero,_ placeHolder:UIImage? = nil) {
+    public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward, _ placeHolder:UIImage? = nil,_ size:Sizes = .full) {
         self.placeHolder = placeHolder
+        self.size = size
+        self.sliderDirection = direction
         super.init(frame: frame)
         createViews()
         insertAndLayoutViews()
@@ -139,8 +169,16 @@ open class MNkImageSlider: UIView {
     /*.........................................
      Mark:- Animation controll func going here
      .........................................*/
-    public func startSliderAnimation(){
-        guard !imagesData.isEmpty else {return}
+    
+    public func playSlider(){
+        isUserStartAnimating = true
+        startSliderAnimation()
+    }
+    
+    private func startSliderAnimation(){
+        guard !imagesData.isEmpty,
+        isUserStartAnimating
+        else {return}
         timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
         isAnimating = true
     }
@@ -150,7 +188,7 @@ open class MNkImageSlider: UIView {
         slider.animateSlider()
     }
     
-    public func stopAnimation(){
+    public func stopSlider(){
         guard isAnimating else{return}
         timer?.invalidate()
         timer = nil
@@ -200,7 +238,7 @@ open class MNkImageSlider: UIView {
 extension MNkImageSlider:SliderDelegate{
     
     func sliderBegainDragging() {
-        stopAnimation()
+        stopSlider()
     }
     
     func sliderEndDragging() {
@@ -234,7 +272,6 @@ extension MNkImageSlider:SliderDataSource{
         return imagesData
     }
 }
-
 
 
 

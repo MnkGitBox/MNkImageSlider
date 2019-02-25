@@ -23,7 +23,10 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         imageSliderStoryBoard.startSliderAnimation()
         imageSliderStoryBoard.isRepeat = true
-        imageSliderStoryBoard.delay = 1
+        imageSliderStoryBoard.delay = 5
+        imageSliderStoryBoard.indicator.selectedColor = .red
+        
+        
     }
     
     

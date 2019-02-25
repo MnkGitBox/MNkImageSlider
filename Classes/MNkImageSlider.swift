@@ -10,33 +10,23 @@ public protocol MNkSliderCompatable{
     var link:URL?{get}
 }
 
+
+
 public protocol MNkSliderDelegate{
     func userScrolled(_ sliderData:Any?)
+
 }
 
 
 open class MNkImageSlider: UIView {
     
-    fileprivate let sliderCell = "sliderCell"
-    public var imagesData:[Any] = []{
-        didSet{
-            reloadData()
-        }
-    }
-    public var delegate:MNkSliderDelegate?
     
-    public var indicatorSelectColor:UIColor = .black
-    public var indicatorUnselectColor:UIColor = .white
-    public var isIndicatorBackgroundVisible = true{
-        didSet{
-//            indicatorBackgroundView.isHidden = !isIndicatorBackgroundVisible
-        }
-    }
-    
+    /*....................................
+     Mark:- Public configurable paramters
+     .....................................*/
     public var sliderBackgroundColor:UIColor = .white{
         didSet{
             self.backgroundColor = sliderBackgroundColor
-            sliderImageCollectionView.backgroundColor = sliderBackgroundColor
         }
     }
     
@@ -48,48 +38,17 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    public var sliderInsets:UIEdgeInsets = .zero{
+    public var imagesData:[Any] = []{
         didSet{
-            sliderImageCollectionView.reloadData()
-        }
-    }
-    public var imageContentMode:UIViewContentMode = .scaleAspectFill{
-        didSet{
-            sliderImageCollectionView.reloadData()
+            reloadData()
         }
     }
     
-    fileprivate var currImgIndex:Int = 0
-    
-    private var placeHolder:UIImage?
-    
-    public var indicator:ItemIndicators!
-    
-    private lazy var sliderImageCollectionView:UICollectionView = {
-        
-        let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
-        layout.minimumInteritemSpacing = 0
-        layout.scrollDirection = .horizontal
-        
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        cv.dataSource = self
-        cv.delegate = self
-        cv.isPagingEnabled = true
-        cv.showsHorizontalScrollIndicator = false
-        cv.showsVerticalScrollIndicator = false
-        cv.backgroundColor = .white
-        cv.translatesAutoresizingMaskIntoConstraints = false
-        return cv
-    }()
-    
-    private var indicatorBottomConstant:NSLayoutConstraint?
-    
-    //------------------------------------------------------------------------------------------------------------------
+    public var delegate:MNkSliderDelegate?
     
     public var isRepeat:Bool = false{
         didSet{
-            sliderImageCollectionView.reloadData()
+            slider.isRepeat = isRepeat
         }
     }
     
@@ -101,40 +60,85 @@ open class MNkImageSlider: UIView {
         }
     }
     
+    
+    
+    
+    
+    /*....................................
+     Mark:- private views and parameters
+     .....................................*/
+    public var indicator:ItemIndicators!
+    
+    public var slider:Slider!
+    
+
+    private var currImgIndex:Int = 0
+    
+    private var placeHolder:UIImage?
+
+    private var indicatorBottomConstant:NSLayoutConstraint?
+    
     private var isAnimating:Bool = false
     
     private var timer:Timer?
     
-    private var itemWidth:CGFloat{
-        return sliderImageCollectionView.bounds.size.width + flowLayout.minimumInteritemSpacing
-    }
-    private var contentOffSetY:CGFloat{
-        return sliderImageCollectionView.contentOffset.y
-    }
-    private var contentOffSetX:CGFloat{
-        return sliderImageCollectionView.contentOffset.x
-    }
-    private var itemsWidth:CGFloat{
-        return sliderImageCollectionView.contentSize.width
-    }
-    private var isLastItem:Bool{
-        return nextContentOffSetX == 0.0
-    }
-    private var flowLayout:UICollectionViewFlowLayout{
-        return sliderImageCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
-    }
-    
-    private var nextContentOffSetX:CGFloat{
-        let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
-        let nextCoOffSet = (contentOffSetX - remain) + itemWidth
-        guard nextCoOffSet < itemsWidth else {
-            return 0.0
-        }
-        return nextCoOffSet
-    }
-
     
     
+    
+    
+    
+    /*.......................................
+     Mark:- Create layout and configure views
+     .......................................*/
+    private func createViews(){
+        slider = Slider(placeHolder)
+        slider.dataSource = self
+        slider.delegate = self
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        
+        indicator = ItemIndicators(imagesData.count)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func insertAndLayoutViews(){
+        addSubview(slider)
+        addSubview(indicator)
+        
+        NSLayoutConstraint.activate([slider.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                                     slider.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+                                     slider.topAnchor.constraint(equalTo: self.topAnchor),
+                                     slider.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
+    
+        indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
+        indicatorBottomConstant?.isActive = true
+        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
+        
+       
+    }
+    
+    public init(frame:CGRect = .zero,_ placeHolder:UIImage? = nil) {
+        self.placeHolder = placeHolder
+        super.init(frame: frame)
+        createViews()
+        insertAndLayoutViews()
+        
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder : aDecoder)
+        createViews()
+        insertAndLayoutViews()
+    }
+    
+    
+    
+    
+    
+    
+    
+    /*.........................................
+     Mark:- Animation controll func going here
+     .........................................*/
     public func startSliderAnimation(){
         guard !imagesData.isEmpty else {return}
         timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
@@ -142,9 +146,8 @@ open class MNkImageSlider: UIView {
     }
     
     @objc private func animateCell(){
-        let isAnimate = isLastItem ? false : true
-        if isLastItem{indicator.activeIndex = 0}
-        sliderImageCollectionView.setContentOffset(CGPoint(x: nextContentOffSetX, y: contentOffSetY), animated: isAnimate)
+        if slider.isLastItem{indicator.activeIndex = 0}
+        slider.animateSlider()
     }
     
     public func stopAnimation(){
@@ -154,34 +157,16 @@ open class MNkImageSlider: UIView {
         isAnimating = false
     }
     
-    private func createViews(){
-        indicator = ItemIndicators(imagesData.count)
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-    }
     
-    private func insertAndLayoutViews(){
-        addSubview(sliderImageCollectionView)
-        addSubview(indicator)
-        
-        NSLayoutConstraint.activate([sliderImageCollectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                                     sliderImageCollectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                                     sliderImageCollectionView.topAnchor.constraint(equalTo: self.topAnchor),
-                                     sliderImageCollectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
-        
-        
-        indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
-        indicatorBottomConstant?.isActive = true
-        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
-        
-       
-    }
     
-    //------------------------------------------------------------------------------------------------------------------
-
     
+    
+    
+    /*.........................................
+     Mark:- Animation controll func going here
+     .........................................*/
     public func reloadData(){
-        
-        sliderImageCollectionView.reloadData()
+        slider.reloadData()
         
         indicator.items = imagesData.count
         indicator.activeIndex = currImgIndex
@@ -190,118 +175,65 @@ open class MNkImageSlider: UIView {
     func removeAll(){
         imagesData.removeAll()
         imagesData = []
-        
-//        self.indicatorHolderStackView.subviews.forEach { view in
-//            view.removeFromSuperview()
-//        }
     }
     
-    public init(frame:CGRect = .zero,_ placeHolder:UIImage? = nil) {
-        self.placeHolder = placeHolder
-        super.init(frame: frame)
-        
-        sliderImageCollectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
-        
-        createViews()
-        insertAndLayoutViews()
-        
-    }
     
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder : aDecoder)
-        sliderImageCollectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
     
-        createViews()
-        insertAndLayoutViews()
-    }
-    
+    /*.........................................
+     Mark:- Send Current visible slider data
+     .........................................*/
     private func sendSelectedData(){
-        guard let visibleCell = sliderImageCollectionView.visibleCells.first as? SliderCVCell else{return}
+        guard let visibleCell = slider.collectionView.visibleCells.first as? SliderCVCell else{return}
         delegate?.userScrolled(visibleCell.imageData)
     }
     
 }
 
 
-extension MNkImageSlider:UIScrollViewDelegate{
+
+
+
+
+/*.....................................
+ Mark:- Slider Delegate methods impli
+ ......................................*/
+extension MNkImageSlider:SliderDelegate{
     
-    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-       stopAnimation()
+    func sliderBegainDragging() {
+        stopAnimation()
     }
     
-    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        guard !decelerate else{return}
+    func sliderEndDragging() {
         sendSelectedData()
         startSliderAnimation()
     }
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        sendSelectedData()
-        startSliderAnimation()
-        
-       setSelectedPage(inScrollPositionOf: scrollView)
-    }
-    
-    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-         sendSelectedData()
-         setSelectedPage(inScrollPositionOf: scrollView)
-    }
-    
-    private func setSelectedPage(inScrollPositionOf scrollView:UIScrollView){
-        let index = selectedItemIndex(in: scrollView)
-        guard index != currImgIndex else{return}
-        currImgIndex = index
-//        startAnimationIndicator(at: currImgIndex)
+    func sliderScrolledPage(_ pageIndex: Int) {
+        guard pageIndex != currImgIndex else{return}
+        currImgIndex = pageIndex
         indicator.activeIndex = currImgIndex
     }
     
-    private func selectedItemIndex(in scrollView:UIScrollView)->Int{
-        let currScrollIndex = CGFloat(contentOffSetX / itemWidth)
-        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(imagesData.count))
-        return Int(itemIndex)
-    }
-    
-}
-
-extension MNkImageSlider:UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard !isRepeat else{
-            return imagesData.count * 100
-        }
-        return imagesData.count
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as! SliderCVCell
-        cell.imageData = imagesData[itemIndex(for: indexPath)]
-        cell.sliderInset = sliderInsets
-        cell.imageContentMode = imageContentMode
-        cell.placeHolder = placeHolder
-        return cell
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = collectionView.bounds.size
-        return size
-    }
-    
-    
-    /*..................................................................................
-     Mark:- Get item index acording to current indexPath
-     This for looping sliders countinuesly when user scroll view slider right or left.
-     ...................................................................................*/
-    private func itemIndex(for indexPath:IndexPath)->Int{
-         guard isRepeat else{return indexPath.item}
-        let itemsLoopTimes = CGFloat(indexPath.item / imagesData.count).rounded(.down)
-        let itemsLoopedUnion = CGFloat(imagesData.count) * itemsLoopTimes
-        let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
-        return indexItem
-    }
-    
 }
 
 
 
+
+
+
+
+
+
+
+
+/*.....................................
+ Mark:- Slider DataSource methods impli
+......................................*/
+extension MNkImageSlider:SliderDataSource{
+    func itemsForSlider() -> [Any] {
+        return imagesData
+    }
+}
 
 
 

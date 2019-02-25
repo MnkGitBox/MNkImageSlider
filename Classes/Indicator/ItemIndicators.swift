@@ -8,6 +8,35 @@
 import Foundation
 open class ItemIndicators:UIView{
     
+    /*....................................
+     Mark:- Public configurable paramters
+     .....................................*/
+    public var selectedColor:UIColor = .black{
+        didSet{
+            reloadData()
+        }
+    }
+    public var unSelectedColor:UIColor = .white{
+        didSet{
+            reloadData()
+        }
+    }
+    public var isVisibleBackground:Bool = true{
+        didSet{
+            backgroundBlurView.isHidden = !isVisibleBackground
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    /*...............................................
+     Mark:- private and internal views and parameters
+     ................................................*/
     var items:Int{
         willSet{
             guard oldItems == newValue else{
@@ -40,6 +69,14 @@ open class ItemIndicators:UIView{
     
     
     
+    
+    
+    
+    
+    
+    /*.......................................
+     Mark:- Create layout and configure views
+     .......................................*/
     private func createViews(){
         
         clipsToBounds = true
@@ -64,20 +101,9 @@ open class ItemIndicators:UIView{
     }
     
     private func insertAndLayoutSubviews(){
-        //        addSubview(scrollView)
         addSubview(backgroundBlurView)
         addSubview(container)
         container.addSubview(stackView)
-        
-        //        NSLayoutConstraint.activate([scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-        //                                     scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-        //                                     scrollView.topAnchor.constraint(equalTo: topAnchor),
-        //                                     scrollView.bottomAnchor.constraint(equalTo: bottomAnchor)])
-        //
-        //        NSLayoutConstraint.activate([stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-        //                                     stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-        //                                     stackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-        //                                     stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)])
         
         NSLayoutConstraint.activate([backgroundBlurView.leadingAnchor.constraint(equalTo: leadingAnchor),
                                      backgroundBlurView.trailingAnchor.constraint(equalTo:trailingAnchor),
@@ -103,8 +129,6 @@ open class ItemIndicators:UIView{
     }
     
     
-    
-    
     init(_ items:Int = 0) {
         self.items = items
         super.init(frame: .zero)
@@ -120,9 +144,23 @@ open class ItemIndicators:UIView{
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*.............................................
+     Mark:- Update indicator view func going here
+     ............................................*/
     private func reloadData(){
         updateIndicators()
         setDefaultIndicators()
+        setActiveIndex()
     }
     
     private func createIndicators(for noItems:Int){
@@ -165,7 +203,7 @@ open class ItemIndicators:UIView{
     private func setDefaultIndicators(){
         for (index,indicator) in indicators.enumerated(){
             indicator.tag = index
-            indicator.backgroundColor = .white
+            indicator.backgroundColor = unSelectedColor
         }
     }
     
@@ -175,7 +213,8 @@ open class ItemIndicators:UIView{
             last != activeIndex
             else{
                 lastActiveIndex = activeIndex
-                indicators[activeIndex].backgroundColor = .black
+                let indicator =  indicators[activeIndex]
+                selectIndicator(true, of: indicator, isAnimate: false)
                 return
         }
         
@@ -187,12 +226,13 @@ open class ItemIndicators:UIView{
         lastActiveIndex = activeIndex
     }
     
-    private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView){
+    private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView,isAnimate animate:Bool = true){
         
-        let transform = isSelect ? CGAffineTransform(scaleX: 1.2, y: 1.2) : .identity
-        let color = isSelect ? UIColor.black : .white
+        let transform = isSelect ? CGAffineTransform(scaleX: 1.1, y: 1.1) : .identity
+        let color = isSelect ? selectedColor : unSelectedColor
+        let duration:TimeInterval = animate ? 0.4 : 0.0
         
-        UIView.animate(withDuration: 0.4) {
+        UIView.animate(withDuration: duration) {
             indicatorView.backgroundColor = color
             indicatorView.transform = transform
         }
@@ -200,22 +240,3 @@ open class ItemIndicators:UIView{
     
 }
 
-
-class Indicator:UIView{
-    init(_ tag:Int = 0) {
-        super.init(frame: .zero)
-        self.tag = tag
-        config()
-    }
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    private func config(){
-        clipsToBounds = true
-        backgroundColor = .white
-        translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 3
-        widthAnchor.constraint(equalToConstant: 6).isActive = true
-        heightAnchor.constraint(equalToConstant: 6).isActive = true
-    }
-}

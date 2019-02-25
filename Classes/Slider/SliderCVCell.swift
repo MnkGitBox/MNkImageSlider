@@ -5,6 +5,7 @@
 //  Copyright © 2017 MNkApps. All rights reserved.
 //
 import SDWebImage
+
 class SliderCVCell:UICollectionViewCell{
     
     var imageData:Any?{

@@ -6,9 +6,9 @@
 //
 import SDWebImage
 
-class SliderCVCell:UICollectionViewCell{
+open class SliderCell:UICollectionViewCell{
     
-    var imageData:Any?{
+    public var imageData:Any?{
         didSet{
             if let _image = imageData as? UIImage{
                 imageView.image = _image
@@ -66,15 +66,14 @@ class SliderCVCell:UICollectionViewCell{
         topConstant?.isActive = true
         bottomConstant?.isActive = true
     }
-    
-    
-    override init(frame: CGRect) {
+
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         insertAndLayoutSubviews()
         backgroundColor = .clear
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     

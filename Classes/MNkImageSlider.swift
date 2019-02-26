@@ -14,9 +14,7 @@ public protocol MNkSliderCompatable{
 
 public protocol MNkSliderDelegate{
     func userScrolled(_ sliderData:Any?)
-
 }
-
 
 open class MNkImageSlider: UIView {
     
@@ -28,7 +26,7 @@ open class MNkImageSlider: UIView {
         case five = 5
     }
     
-    @objc
+    
     public enum SliderDirection:Int{
         case forward = 0
         case backward = 1
@@ -59,6 +57,9 @@ open class MNkImageSlider: UIView {
     }
     
     public var delegate:MNkSliderDelegate?
+    public var sliderDataSource:MNkSliderDataSource?
+    
+    var datasource:SliderDataSource?
     
     @IBInspectable public var isRepeat:Bool = false{
         didSet{
@@ -120,6 +121,7 @@ open class MNkImageSlider: UIView {
      .......................................*/
     private func createViews(){
         slider = Slider(sliderDirection, size, placeHolder)
+        slider.sliderDataSource = self
         slider.dataSource = self
         slider.delegate = self
         slider.translatesAutoresizingMaskIntoConstraints = false
@@ -221,7 +223,7 @@ open class MNkImageSlider: UIView {
      Mark:- Send Current visible slider data
      .........................................*/
     private func sendSelectedData(){
-        guard let visibleCell = slider.collectionView.visibleCells.first as? SliderCVCell else{return}
+        guard let visibleCell = slider.collectionView.visibleCells.first as? SliderCell else{return}
         delegate?.userScrolled(visibleCell.imageData)
     }
     
@@ -268,11 +270,17 @@ extension MNkImageSlider:SliderDelegate{
  Mark:- Slider DataSource methods impli
 ......................................*/
 extension MNkImageSlider:SliderDataSource{
-    func itemsForSlider() -> [Any] {
+    public func itemsForSlider() -> [Any] {
         return imagesData
     }
 }
 
+
+extension MNkImageSlider:MNkSliderDataSource{
+    public func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
+        return sliderDataSource?.mnkSliderItemCell(in: slider, for: indexPath)
+    }
+}
 
 
 

@@ -7,8 +7,13 @@
 
 import UIKit
 
-protocol SliderDataSource{
+public protocol SliderDataSource{
     func itemsForSlider()->[Any]
+}
+
+
+public protocol MNkSliderDataSource{
+    func mnkSliderItemCell(in slider:Slider,for indexPath:IndexPath)->SliderCell?
 }
 
 protocol SliderDelegate{
@@ -50,6 +55,8 @@ public class Slider:UIView{
     
     var dataSource:SliderDataSource?
     var delegate:SliderDelegate?
+    
+    var sliderDataSource:MNkSliderDataSource?
     
     var size:MNkImageSlider.Sizes = .full{
         didSet{
@@ -149,7 +156,7 @@ public class Slider:UIView{
     }
     
     private func config(){
-        collectionView.register(SliderCVCell.self, forCellWithReuseIdentifier: sliderCell)
+        collectionView.register(SliderCell.self, forCellWithReuseIdentifier: sliderCell)
         collectionView.backgroundColor = .clear
         backgroundColor = .clear
     }
@@ -168,12 +175,29 @@ public class Slider:UIView{
         fatalError("init(coder:) has not been implemented")
     }
     
+    
+    
+    /*....................................
+     Mark:- Register custom cell to Slider
+     .....................................*/
+    public func register(slider cell:AnyClass?,with identifier:String){
+        collectionView.register(cell.self, forCellWithReuseIdentifier: identifier)
+    }
+    
+    
+    
+    
+    
+    
+    
     func reloadData(){
         collectionView.reloadData()
     }
     
     
-    
+    /*...............................................................
+     Mark:- ContentOffSetX value for when layout backward and forward
+     ...............................................................*/
     private func contentOffSetForForward()->CGFloat{
         let remain = contentOffSetX.truncatingRemainder(dividingBy: itemWidth)
         let nextCoOffSet = (contentOffSetX - remain) + itemWidth
@@ -228,12 +252,12 @@ public class Slider:UIView{
      Mark:- Get item index acording to current indexPath
      This for looping sliders countinuesly when user scroll view slider right or left.
      ...................................................................................*/
-    private func itemIndex(for indexPath:IndexPath)->Int{
-        guard isRepeat else{return indexPath.item}
+    private func itemIndex(for indexPath:IndexPath)->IndexPath{
+        guard isRepeat else{return indexPath}
         let itemsLoopTimes = CGFloat(indexPath.item / items.count).rounded(.down)
         let itemsLoopedUnion = CGFloat(items.count) * itemsLoopTimes
         let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
-        return indexItem
+        return IndexPath(item: indexItem, section: indexPath.section)
     }
     
     
@@ -317,11 +341,21 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as! SliderCVCell
-        cell.imageData = items[itemIndex(for: indexPath)]
-                cell.sliderInset = insets
-                cell.imageContentMode = imageContentMode
-                cell.placeHolder = placeHolder
+        
+        var cell:SliderCell!
+        
+        let itemIndexPath = itemIndex(for: indexPath)
+        
+        if let _cell = sliderDataSource?.mnkSliderItemCell(in: self, for: itemIndexPath){
+            cell = _cell
+        }else{
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as? SliderCell
+            cell.imageData = items[itemIndexPath.item]
+        }
+        
+        cell.sliderInset = insets
+        cell.imageContentMode = imageContentMode
+        cell.placeHolder = placeHolder
         return cell
     }
     
@@ -330,4 +364,12 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
         return size
     }
     
+    public func dequeSliderCell(with identifier:String,for indexPath:IndexPath)->SliderCell{
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? SliderCell else{fatalError("could not dequeue a view of kind: SliderCell with identifier \(identifier) - must register class for the identifier using slider. register(slider view:AnyClass?,with identifier:String")}
+        return cell
+    }
+    
 }
+
+
+

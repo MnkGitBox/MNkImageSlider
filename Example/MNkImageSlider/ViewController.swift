@@ -29,6 +29,7 @@ class ViewController: UIViewController {
         imageSliderStoryBoard.delay = 5
         imageSliderStoryBoard.indicator.selectedColor = .red
         imageSliderStoryBoard.size = .two
+        imageSliderStoryBoard.isActiveIndicator = false
         imageSliderStoryBoard.slider.imageContentMode = .scaleAspectFill
         
     }

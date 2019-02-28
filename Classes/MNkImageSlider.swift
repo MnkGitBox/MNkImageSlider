@@ -81,7 +81,13 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    
+    public var isActiveIndicator:Bool{
+        get{
+            return !indicator.isHidden
+        }set{
+            indicator.isHidden = !newValue
+        }
+    }
     
     
     /*...................
@@ -186,7 +192,7 @@ open class MNkImageSlider: UIView {
     }
     
     @objc private func animateCell(){
-        if slider.isLastItem{indicator.activeIndex = 0}
+        if slider.isLastItem,isActiveIndicator{indicator.activeIndex = 0}
         slider.animateSlider()
     }
     
@@ -208,6 +214,7 @@ open class MNkImageSlider: UIView {
     public func reloadData(){
         slider.reloadData()
         
+        guard isActiveIndicator else{return}
         indicator.items = imagesData.count
         indicator.activeIndex = currImgIndex
     }
@@ -249,7 +256,7 @@ extension MNkImageSlider:SliderDelegate{
     }
     
     func sliderScrolledPage(_ pageIndex: Int) {
-        guard pageIndex != currImgIndex else{return}
+        guard pageIndex != currImgIndex,isActiveIndicator else{return}
         currImgIndex = pageIndex
         indicator.activeIndex = currImgIndex
     }

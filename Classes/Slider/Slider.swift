@@ -2,7 +2,7 @@
 //  Slider.swift
 //  MNkImageSlider
 //
-//  Created by MNk_Dev on 25/2/19.
+//  Created by Malith Nadeeshan on 25/2/19.
 //
 
 import UIKit
@@ -20,6 +20,7 @@ protocol SliderDelegate{
     func sliderBegainDragging()
     func sliderEndDragging()
     func sliderScrolledPage(_ pageIndex:Int)
+    func didSelectSlider(item:Any,at indexPath:IndexPath)
 }
 
 public class Slider:UIView{
@@ -113,7 +114,7 @@ public class Slider:UIView{
     private var directionAttrib:UISemanticContentAttribute{
         return self.direction == .forward ? UISemanticContentAttribute.forceLeftToRight : .forceRightToLeft
     }
- 
+    
     private var nextContentOffSetX:CGFloat{
         guard direction == .forward else{return contentOffSetForBackward()}
         return contentOffSetForForward()
@@ -123,7 +124,7 @@ public class Slider:UIView{
         return collectionView.contentSize.width - collectionView.bounds.size.width
     }
     
-
+    
     
     
     
@@ -252,7 +253,7 @@ public class Slider:UIView{
      Mark:- Get item index acording to current indexPath
      This for looping sliders countinuesly when user scroll view slider right or left.
      ...................................................................................*/
-    private func itemIndex(for indexPath:IndexPath)->IndexPath{
+    public func itemIndex(for indexPath:IndexPath)->IndexPath{
         guard isRepeat else{return indexPath}
         let itemsLoopTimes = CGFloat(indexPath.item / items.count).rounded(.down)
         let itemsLoopedUnion = CGFloat(items.count) * itemsLoopTimes
@@ -312,7 +313,7 @@ extension Slider:UIScrollViewDelegate{
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         setSelectedPage(inScrollPositionOf: scrollView)
     }
- 
+    
 }
 
 
@@ -367,6 +368,12 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
     public func dequeSliderCell(with identifier:String,for indexPath:IndexPath)->SliderCell{
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? SliderCell else{fatalError("could not dequeue a view of kind: SliderCell with identifier \(identifier) - must register class for the identifier using slider. register(slider view:AnyClass?,with identifier:String")}
         return cell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at:indexPath) as? SliderCell,
+            let imageData = cell.imageData else{return}
+        delegate?.didSelectSlider(item: imageData, at: itemIndex(for: indexPath))
     }
     
 }

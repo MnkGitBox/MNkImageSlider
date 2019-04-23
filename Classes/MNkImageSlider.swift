@@ -14,6 +14,7 @@ public protocol MNkSliderCompatable{
 
 public protocol MNkSliderDelegate{
     func userScrolled(_ sliderData:Any?)
+    func userTappedSlider(_ item:Any,at indexPath:IndexPath)
 }
 
 open class MNkImageSlider: UIView {
@@ -245,6 +246,10 @@ open class MNkImageSlider: UIView {
  Mark:- Slider Delegate methods impli
  ......................................*/
 extension MNkImageSlider:SliderDelegate{
+    func didSelectSlider(item: Any, at indexPath: IndexPath) {
+        delegate?.userTappedSlider(item, at: indexPath)
+    }
+    
     
     func sliderBegainDragging() {
         stopSlider()

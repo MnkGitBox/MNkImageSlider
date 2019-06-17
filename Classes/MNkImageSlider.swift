@@ -51,7 +51,7 @@ open class MNkImageSlider: UIView {
         }
     }
     
-   public var imagesData:[Any] = []{
+    public var imagesData:[Any] = []{
         didSet{
             reloadData()
         }
@@ -98,14 +98,14 @@ open class MNkImageSlider: UIView {
     
     public var slider:Slider!
     
-
+    
     /*....................................
      Mark:- private  parameters
      .....................................*/
     private var currImgIndex:Int = 0
     
     private var placeHolder:UIImage?
-
+    
     private var indicatorBottomConstant:NSLayoutConstraint?
     
     private var isAnimating:Bool = false
@@ -145,12 +145,12 @@ open class MNkImageSlider: UIView {
                                      slider.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                                      slider.topAnchor.constraint(equalTo: self.topAnchor),
                                      slider.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
-    
+        
         indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
         indicatorBottomConstant?.isActive = true
         NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
         
-       
+        
     }
     
     public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward, _ placeHolder:UIImage? = nil,_ size:Sizes = .full) {
@@ -186,8 +186,8 @@ open class MNkImageSlider: UIView {
     
     private func startSliderAnimation(){
         guard !imagesData.isEmpty,
-        isUserStartAnimating
-        else {return}
+            isUserStartAnimating
+            else {return}
         timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
         isAnimating = true
     }
@@ -280,7 +280,7 @@ extension MNkImageSlider:SliderDelegate{
 
 /*.....................................
  Mark:- Slider DataSource methods impli
-......................................*/
+ ......................................*/
 extension MNkImageSlider:SliderDataSource{
     public func itemsForSlider() -> [Any] {
         return imagesData
@@ -289,6 +289,10 @@ extension MNkImageSlider:SliderDataSource{
 
 
 extension MNkImageSlider:MNkSliderDataSource{
+    public func mnkSliderNumberOfItems(in slider: Slider) -> Int {
+        return sliderDataSource?.mnkSliderNumberOfItems(in: slider) ?? 1
+    }
+    
     public func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
         return sliderDataSource?.mnkSliderItemCell(in: slider, for: indexPath)
     }

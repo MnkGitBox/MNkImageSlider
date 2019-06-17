@@ -39,6 +39,10 @@ class ViewController: UIViewController {
 
 
 extension ViewController:MNkSliderDataSource{
+    func mnkSliderNumberOfItems(in slider: Slider) -> Int {
+        return data.count
+    }
+    
     func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
         let cell = slider.dequeSliderCell(with: "test", for: indexPath) as! SliderSample
         cell.label.text = "\(indexPath)"

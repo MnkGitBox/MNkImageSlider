@@ -14,6 +14,7 @@ public protocol SliderDataSource{
 
 public protocol MNkSliderDataSource{
     func mnkSliderItemCell(in slider:Slider,for indexPath:IndexPath)->SliderCell?
+    func mnkSliderNumberOfItems(in slider:Slider)->Int
 }
 
 protocol SliderDelegate{
@@ -89,8 +90,19 @@ public class Slider:UIView{
      ........................*/
     private let sliderCell = "sliderCell"
     
-    private var items:[Any]{
+    private var slidetItems:[Any]{
         return dataSource?.itemsForSlider() ?? []
+    }
+    
+    private var numberOfItems:Int{
+        var items = 0
+        if let _items = dataSource?.itemsForSlider().count{
+            items = _items
+        }
+        if let _items = sliderDataSource?.mnkSliderNumberOfItems(in: self){
+            items = _items
+        }
+        return items
     }
     
     private var isAnimating:Bool = false
@@ -242,9 +254,9 @@ public class Slider:UIView{
     
     private func selectedItemIndex(in scrollView:UIScrollView)->Int{
         let currScrollIndex = CGFloat(contentOffSetX / itemWidth)
-        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(items.count))
+        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(numberOfItems))
         guard direction == .backward else{return Int(itemIndex)}
-        let backWardIndex = (items.count - 1) - Int(itemIndex)
+        let backWardIndex = (numberOfItems - 1) - Int(itemIndex)
         return backWardIndex
     }
     
@@ -255,8 +267,8 @@ public class Slider:UIView{
      ...................................................................................*/
     public func itemIndex(for indexPath:IndexPath)->IndexPath{
         guard isRepeat else{return indexPath}
-        let itemsLoopTimes = CGFloat(indexPath.item / items.count).rounded(.down)
-        let itemsLoopedUnion = CGFloat(items.count) * itemsLoopTimes
+        let itemsLoopTimes = CGFloat(indexPath.item / numberOfItems).rounded(.down)
+        let itemsLoopedUnion = CGFloat(numberOfItems) * itemsLoopTimes
         let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
         return IndexPath(item: indexItem, section: indexPath.section)
     }
@@ -336,9 +348,11 @@ extension Slider:UIScrollViewDelegate{
 extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard !isRepeat else{
-            return items.count * 100
+            return numberOfItems * 100
         }
-        return items.count
+        //        let sliderItems = sliderDataSource?.mnkSliderNumberOfItems(in: self) ?? numberOfItems
+        print(numberOfItems)
+        return numberOfItems
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -351,7 +365,7 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
             cell = _cell
         }else{
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as? SliderCell
-            cell.imageData = items[itemIndexPath.item]
+            cell.imageData = slidetItems[itemIndexPath.item]
         }
         
         cell.sliderInset = insets

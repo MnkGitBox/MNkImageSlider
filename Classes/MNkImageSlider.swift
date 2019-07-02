@@ -10,15 +10,23 @@ public protocol MNkSliderCompatable{
     var link:URL?{get}
 }
 
+public extension MNkSliderCompatable{
+    var link:URL?{
+        return nil
+    }
+}
 
 
 public protocol MNkSliderDelegate{
     func userScrolled(_ sliderData:Any?)
     func userTappedSlider(_ item:Any,at indexPath:IndexPath)
 }
+public extension MNkSliderDelegate{
+    func userScrolled(_ sliderData:Any?){}
+    func userTappedSlider(_ item:Any,at indexPath:IndexPath){}
+}
 
 open class MNkImageSlider: UIView {
-    
     public enum Sizes:Int{
         case full = 1
         case two = 2

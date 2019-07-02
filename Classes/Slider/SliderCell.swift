@@ -38,7 +38,7 @@ open class SliderCell:UICollectionViewCell{
         }
     }
     
-    var placeHolder:UIImage?
+    public var placeHolder:UIImage?
     
     private let imageView:UIImageView = {
         let iv = UIImageView()
@@ -66,7 +66,7 @@ open class SliderCell:UICollectionViewCell{
         topConstant?.isActive = true
         bottomConstant?.isActive = true
     }
-
+    
     public override init(frame: CGRect) {
         super.init(frame: frame)
         insertAndLayoutSubviews()

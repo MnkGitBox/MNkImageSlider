@@ -65,7 +65,7 @@ open class ItemIndicators:UIView{
     private var backgroundBlurView:UIVisualEffectView!
     
     private var indicators = [Indicator]()
-   
+    
     
     
     

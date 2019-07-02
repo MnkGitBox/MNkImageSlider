@@ -365,12 +365,12 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
             cell = _cell
         }else{
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as? SliderCell
+            cell.placeHolder = placeHolder
             cell.imageData = slidetItems[itemIndexPath.item]
         }
         
         cell.sliderInset = insets
         cell.imageContentMode = imageContentMode
-        cell.placeHolder = placeHolder
         return cell
     }
     

@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
          imageSliderStoryBoard.slider.register(slider: SliderSample.self, with: "test")
          imageSliderStoryBoard.sliderDataSource = self
+        imageSliderStoryBoard.delegate = self
          imageSliderStoryBoard.imagesData = data
     }
     
@@ -30,15 +31,13 @@ class ViewController: UIViewController {
         imageSliderStoryBoard.indicator.selectedColor = .red
         imageSliderStoryBoard.size = .two
         imageSliderStoryBoard.isActiveIndicator = false
-        imageSliderStoryBoard.slider.imageContentMode = .scaleAspectFill
-        
     }
     
     
 }
 
 
-extension ViewController:MNkSliderDataSource{
+extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
     func mnkSliderNumberOfItems(in slider: Slider) -> Int {
         return data.count
     }
@@ -48,6 +47,10 @@ extension ViewController:MNkSliderDataSource{
         cell.label.text = "\(indexPath)"
         cell.imageData = data[indexPath.item]
         return cell
+    }
+    
+    func userScrolled(_ sliderData: Any?, atCellIndex indexPath: IndexPath, of cell: SliderCell) {
+        print("Scrolled: ",indexPath.item)
     }
 }
 

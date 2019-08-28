@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MNkSliderEffectCollectionViewLayout
 
 public protocol SliderDataSource{
     func itemsForSlider()->[Any]
@@ -21,31 +22,13 @@ protocol SliderDelegate{
     func sliderBegainDragging()
     func sliderEndDragging()
     func sliderScrolledPage(_ pageIndex:Int)
-    func didSelectSlider(item:Any,at indexPath:IndexPath)
+    func didSelectSlider(item:Any,_ cell:SliderCell,at indexPath:IndexPath)
 }
 
 public class Slider:UIView{
-    
-    
-    /*....................................
-     Mark:- Public configurable veriables
-     .....................................*/
-    public var insets:UIEdgeInsets = .zero{
-        didSet{
-            reloadData()
-        }
-    }
-    public var imageContentMode:UIViewContentMode = .scaleToFill{
-        didSet{
-            reloadData()
-        }
-    }
-    public var placeHolder:UIImage?
-    
+
     var direction:MNkImageSlider.SliderDirection = .forward
-    
-    
-    
+
     /*................................
      Mark:- intrernal access veriables
      ..................................*/
@@ -79,6 +62,7 @@ public class Slider:UIView{
      Mark:- internal views
      ........................*/
     var collectionView:UICollectionView!
+    var layout:MNkSliderScrollEffectLayout!
     
     
     
@@ -144,20 +128,20 @@ public class Slider:UIView{
      Mark:- Create and layout and config views
      .........................................*/
     private func createViews(){
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.minimumLineSpacing = 0
-        flowLayout.minimumInteritemSpacing = 0
-        flowLayout.scrollDirection = .horizontal
+        layout = MNkSliderScrollEffectLayout()
+        layout.interItemSpace = 0
+        layout.minScaleFactor = 1.0
+        layout.isPaginEnabled = true
         
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.isPagingEnabled = true
+        collectionView.sliderScrollEffectDelegate = self
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.semanticContentAttribute = directionAttrib
+//        collectionView.semanticContentAttribute = directionAttrib
         
     }
     private func inserAndLayoutSubviews(){
@@ -174,8 +158,7 @@ public class Slider:UIView{
         backgroundColor = .clear
     }
     
-    init(_ direction:MNkImageSlider.SliderDirection,_ size:MNkImageSlider.Sizes,_ placeHolder:UIImage?) {
-        self.placeHolder = placeHolder
+    init(_ direction:MNkImageSlider.SliderDirection,_ size:MNkImageSlider.Sizes) {
         self.size = size
         self.direction = direction
         super.init(frame: .zero)
@@ -204,7 +187,7 @@ public class Slider:UIView{
     
     
     func reloadData(){
-        collectionView.reloadData()
+        collectionView.reload()
     }
     
     
@@ -247,13 +230,13 @@ public class Slider:UIView{
     /*...................................
      Mark:- Calculate selected page index
      ....................................*/
-    private func setSelectedPage(inScrollPositionOf scrollView:UIScrollView){
-        let index = selectedItemIndex(in: scrollView)
-        delegate?.sliderScrolledPage(index)
-    }
-    
-    private func selectedItemIndex(in scrollView:UIScrollView)->Int{
-        let currScrollIndex = CGFloat(contentOffSetX / itemWidth)
+//    private func setSelectedPage(inScrollPositionOf scrollView:UIScrollView){
+//        let index = selectedItemIndex(in: scrollView)
+//        delegate?.sliderScrolledPage(index)
+//    }
+//
+    private func selectedItemIndex(using currentIndexPath:IndexPath)->Int{
+        let currScrollIndex = CGFloat(currentIndexPath.item)
         let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(numberOfItems))
         guard direction == .backward else{return Int(itemIndex)}
         let backWardIndex = (numberOfItems - 1) - Int(itemIndex)
@@ -311,21 +294,15 @@ extension Slider:UIScrollViewDelegate{
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         delegate?.sliderBegainDragging()
     }
-    
+
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         guard !decelerate else{return}
         delegate?.sliderEndDragging()
     }
-    
+
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         delegate?.sliderEndDragging()
-        setSelectedPage(inScrollPositionOf: scrollView)
     }
-    
-    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        setSelectedPage(inScrollPositionOf: scrollView)
-    }
-    
 }
 
 
@@ -345,13 +322,11 @@ extension Slider:UIScrollViewDelegate{
 /*...................................................
  Mark:- Collectionview delegate and datasource impli.
  ....................................................*/
-extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
+extension Slider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutProtocol,UICollectionViewDelegate{
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard !isRepeat else{
             return numberOfItems * 100
         }
-        //        let sliderItems = sliderDataSource?.mnkSliderNumberOfItems(in: self) ?? numberOfItems
-        print(numberOfItems)
         return numberOfItems
     }
     
@@ -365,17 +340,23 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
             cell = _cell
         }else{
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: sliderCell, for: indexPath) as? SliderCell
-            cell.placeHolder = placeHolder
+            //            cell.placeHolder = placeHolder
             cell.imageData = slidetItems[itemIndexPath.item]
         }
         
-        cell.sliderInset = insets
-        cell.imageContentMode = imageContentMode
+        //        cell.sliderInset = insets
+        //        cell.imageContentMode = imageContentMode
         return cell
     }
     
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        let size = sliderSizeForSizeClass(from: collectionView.bounds.size)
+//        return size
+//    }
+//
+    public func collectionview(_ collectionView: UICollectionView, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let size = sliderSizeForSizeClass(from: collectionView.bounds.size)
+        print("Size :",size,"full Size: ",collectionView.bounds.size)
         return size
     }
     
@@ -384,10 +365,15 @@ extension Slider:UICollectionViewDataSource,UICollectionViewDelegateFlowLayout{
         return cell
     }
     
-    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = collectionView.cellForItem(at:indexPath) as? SliderCell,
             let imageData = cell.imageData else{return}
-        delegate?.didSelectSlider(item: imageData, at: itemIndex(for: indexPath))
+        delegate?.didSelectSlider(item: imageData, cell, at: itemIndex(for: indexPath))
+    }
+    
+    public func sliderCollectionView(activeCell indexPath: IndexPath, in collectionView: UICollectionView, with layout: MNkSliderScrollEffectLayout) {
+        let selectedItemIndex = self.selectedItemIndex(using: indexPath)
+        delegate?.sliderScrolledPage(selectedItemIndex)
     }
     
 }

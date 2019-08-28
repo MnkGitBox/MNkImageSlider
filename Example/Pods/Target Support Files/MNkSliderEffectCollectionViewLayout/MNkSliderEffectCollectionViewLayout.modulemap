@@ -1,0 +1,6 @@
+framework module MNkSliderEffectCollectionViewLayout {
+  umbrella header "MNkSliderEffectCollectionViewLayout-umbrella.h"
+
+  export *
+  module * { export * }
+}

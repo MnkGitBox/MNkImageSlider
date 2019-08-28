@@ -18,12 +18,12 @@ public extension MNkSliderCompatable{
 
 
 public protocol MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?)
-    func userTappedSlider(_ item:Any,at indexPath:IndexPath)
+    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell)
+    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath)
 }
 public extension MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?){}
-    func userTappedSlider(_ item:Any,at indexPath:IndexPath){}
+    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell){}
+    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath){}
 }
 
 open class MNkImageSlider: UIView {
@@ -112,8 +112,6 @@ open class MNkImageSlider: UIView {
      .....................................*/
     private var currImgIndex:Int = 0
     
-    private var placeHolder:UIImage?
-    
     private var indicatorBottomConstant:NSLayoutConstraint?
     
     private var isAnimating:Bool = false
@@ -135,7 +133,7 @@ open class MNkImageSlider: UIView {
      Mark:- Create layout and configure views
      .......................................*/
     private func createViews(){
-        slider = Slider(sliderDirection, size, placeHolder)
+        slider = Slider(sliderDirection, size)
         slider.sliderDataSource = self
         slider.dataSource = self
         slider.delegate = self
@@ -161,8 +159,7 @@ open class MNkImageSlider: UIView {
         
     }
     
-    public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward, _ placeHolder:UIImage? = nil,_ size:Sizes = .full) {
-        self.placeHolder = placeHolder
+    public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward,_ size:Sizes = .full) {
         self.size = size
         self.sliderDirection = direction
         super.init(frame: frame)
@@ -239,8 +236,9 @@ open class MNkImageSlider: UIView {
      Mark:- Send Current visible slider data
      .........................................*/
     private func sendSelectedData(){
-        guard let visibleCell = slider.collectionView.visibleCells.first as? SliderCell else{return}
-        delegate?.userScrolled(visibleCell.imageData)
+        let indexPath = slider.layout.displayIndexPath
+        guard let sliderCell = slider.collectionView.cellForItem(at: indexPath) as? SliderCell else{return}
+        delegate?.userScrolled(sliderCell.imageData, atCellIndex: indexPath, of: sliderCell)
     }
     
 }
@@ -254,24 +252,26 @@ open class MNkImageSlider: UIView {
  Mark:- Slider Delegate methods impli
  ......................................*/
 extension MNkImageSlider:SliderDelegate{
-    func didSelectSlider(item: Any, at indexPath: IndexPath) {
-        delegate?.userTappedSlider(item, at: indexPath)
+    func didSelectSlider(item: Any, _ cell: SliderCell, at indexPath: IndexPath) {
+        delegate?.userTappedSlider(item, cell, at: indexPath)
     }
-    
     
     func sliderBegainDragging() {
         stopSlider()
     }
     
     func sliderEndDragging() {
-        sendSelectedData()
+       
         startSliderAnimation()
     }
     
     func sliderScrolledPage(_ pageIndex: Int) {
-        guard pageIndex != currImgIndex,isActiveIndicator else{return}
+        guard pageIndex != currImgIndex else{return}
         currImgIndex = pageIndex
-        indicator.activeIndex = currImgIndex
+        sendSelectedData()
+        
+        guard isActiveIndicator else{return}
+         indicator.activeIndex = currImgIndex
     }
     
 }

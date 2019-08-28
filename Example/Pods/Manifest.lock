@@ -1,6 +1,8 @@
 PODS:
-  - MNkImageSlider (0.1.0):
+  - MNkImageSlider (0.2.1.1):
+    - MNkSliderEffectCollectionViewLayout
     - SDWebImage
+  - MNkSliderEffectCollectionViewLayout (1.02)
   - SDWebImage (4.4.2):
     - SDWebImage/Core (= 4.4.2)
   - SDWebImage/Core (4.4.2)
@@ -10,6 +12,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - MNkSliderEffectCollectionViewLayout
     - SDWebImage
 
 EXTERNAL SOURCES:
@@ -17,9 +20,10 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  MNkImageSlider: cb4a61a695086ba23f1bb21a3d9bfd61d0de6d64
+  MNkImageSlider: 711559dc076b2fdcf46703bcec79c1f899b25069
+  MNkSliderEffectCollectionViewLayout: dbb43ceb978674f04a2fe4e9a2f3cdd50713ee61
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
 
 PODFILE CHECKSUM: 14cd916d6fcd3fb020077f832b8cea96b4224be0
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.7.5

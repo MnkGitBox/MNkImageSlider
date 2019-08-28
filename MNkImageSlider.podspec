@@ -37,5 +37,6 @@ Pod::Spec.new do |s|
   # s.public_header_files = 'Pod/Classes/**/*.h'
    s.frameworks = 'UIKit'
    s.dependency 'SDWebImage'
+   s.dependency 'MNkSliderEffectCollectionViewLayout'
    s.swift_version = '4.0'
 end

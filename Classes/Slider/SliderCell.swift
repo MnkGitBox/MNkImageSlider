@@ -26,13 +26,13 @@ open class SliderCell:UICollectionViewCell{
         }
     }
     
-    var sliderInset:UIEdgeInsets = .zero{
+    public var sliderInset:UIEdgeInsets = .zero{
         didSet{
             updateInset()
         }
     }
     
-    var imageContentMode:UIViewContentMode = .scaleAspectFill{
+    public var imageContentMode:UIViewContentMode = .scaleToFill{
         didSet{
             imageView.contentMode = imageContentMode
         }
@@ -40,10 +40,10 @@ open class SliderCell:UICollectionViewCell{
     
     public var placeHolder:UIImage?
     
-    private let imageView:UIImageView = {
+    private lazy var imageView:UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = self.imageContentMode
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()

@@ -52,6 +52,9 @@
 		703A179495E6C2506769BF910DDB7628 /* SDWebImagePrefetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 147FC20A2D42C586D598F587688C29D5 /* SDWebImagePrefetcher.m */; };
 		71D549AB35F2036B990A53962ED55234 /* UIView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 43EBFA1931BF5E954B1924F3A305A0AA /* UIView+WebCache.m */; };
 		7557465F86AC2ED8050A018AD4C60749 /* MNkSliderEffectCollectionViewLayout-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D60CC21C92DA6BD2050A38B86051955 /* MNkSliderEffectCollectionViewLayout-dummy.m */; };
+		77DA363D2317E5D200AF2C70 /* SliderAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DA363A2317E5D100AF2C70 /* SliderAnimator.swift */; };
+		77DA363E2317E5D200AF2C70 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DA363B2317E5D100AF2C70 /* Enums.swift */; };
+		77DA363F2317E5D200AF2C70 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DA363C2317E5D200AF2C70 /* Protocols.swift */; };
 		787190460168A6DA23CE8E509AF3DE64 /* MNkSliderEffectCollectionViewLayout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 400D21A8022DB0F03E45BA8F786E864E /* MNkSliderEffectCollectionViewLayout.framework */; };
 		7DA3093D832E9A47D4F1EA633A2B33A7 /* SDWebImageCoderHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7188DAA95F714104D6FC20A834F2D8D0 /* SDWebImageCoderHelper.m */; };
 		823FB8FCDF230D8E2BE2D1C8D83DB73F /* UIImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 2516A4D7F0878B938AF9F6D727D11C8B /* UIImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -65,7 +68,6 @@
 		91BBE6AA96AC3CCE04F36A63817C4DC6 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5CE3FD05EED7092E7B715C6AAD699A /* Utilities.swift */; };
 		94A3D9F8C87287B37EA1E1A3774A5521 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86CF05C25431E62CB5B7B53A73803B01 /* Foundation.framework */; };
 		96BD0CBA7F8523632319E68B6E34FBE5 /* SDWebImageCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = B46B56663D2CA0DE063E80C0BA038AF9 /* SDWebImageCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		96E8E784931374DBF746828144F69848 /* Slider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42D040146A376D2C1C6455B125A05E1 /* Slider.swift */; };
 		9B0377BDA64EE60F24E43B13DDCDB3B1 /* SDImageCacheConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81CA733CBB1697E72E13F15A34D4045D /* SDImageCacheConfig.m */; };
 		9D9B35046813EEF4A45F8477820939D2 /* SDWebImageImageIOCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D7DCB3FE8A10EFF9948F7E874505ACC /* SDWebImageImageIOCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A79B99491942B1B72DD3B2BF091A5323 /* SDWebImageDownloaderOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = EE231F62B0103A1E8A521EA3BB6E49C0 /* SDWebImageDownloaderOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -195,6 +197,9 @@
 		75DB592DDAE7850AC9C906EACD2B17A7 /* SDWebImageTransition.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageTransition.m; path = SDWebImage/SDWebImageTransition.m; sourceTree = "<group>"; };
 		76699595C37E0BDEFC1445CC07EC9F47 /* SDWebImageCodersManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageCodersManager.m; path = SDWebImage/SDWebImageCodersManager.m; sourceTree = "<group>"; };
 		76E4F3D8F59D6E73435B58FEB0FCB18C /* SDAnimatedImageRep.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDAnimatedImageRep.m; path = SDWebImage/SDAnimatedImageRep.m; sourceTree = "<group>"; };
+		77DA363A2317E5D100AF2C70 /* SliderAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SliderAnimator.swift; path = Classes/SliderAnimator.swift; sourceTree = "<group>"; };
+		77DA363B2317E5D100AF2C70 /* Enums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Enums.swift; path = Classes/Enums.swift; sourceTree = "<group>"; };
+		77DA363C2317E5D200AF2C70 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Protocols.swift; path = Classes/Protocols.swift; sourceTree = "<group>"; };
 		7C197BCB4DE5BB837C72DF95D162CE81 /* UIImage+GIF.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+GIF.m"; path = "SDWebImage/UIImage+GIF.m"; sourceTree = "<group>"; };
 		7C3E653BEE87579341E21A15D71D4353 /* Pods-MNkImageSlider_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-MNkImageSlider_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		8043E934185BCEC73B76A19B298F893C /* Pods-MNkImageSlider_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-MNkImageSlider_Example-dummy.m"; sourceTree = "<group>"; };
@@ -242,7 +247,6 @@
 		F0F276940E607B6C29BAD6ED0B26647A /* SDWebImage-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SDWebImage-Info.plist"; sourceTree = "<group>"; };
 		F16F223A037D46084D93E5EEBC8DB8E5 /* SDWebImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-umbrella.h"; sourceTree = "<group>"; };
 		F352B7DD795DEF578C9CF9E04BE26434 /* ActiveCellDisplayPosition.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ActiveCellDisplayPosition.swift; path = Classes/ActiveCellDisplayPosition.swift; sourceTree = "<group>"; };
-		F42D040146A376D2C1C6455B125A05E1 /* Slider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Slider.swift; sourceTree = "<group>"; };
 		F82DC58ADA14869F30D838A6C5A2C36F /* UIButton+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIButton+WebCache.m"; path = "SDWebImage/UIButton+WebCache.m"; sourceTree = "<group>"; };
 		FA6A7960D1C000CFAAD8C707D7D2346C /* NSImage+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSImage+WebCache.h"; path = "SDWebImage/NSImage+WebCache.h"; sourceTree = "<group>"; };
 		FAD45F37953059CAC8C2BC31244A5DB7 /* MNkSliderScrollEffectLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MNkSliderScrollEffectLayout.swift; path = Classes/MNkSliderScrollEffectLayout.swift; sourceTree = "<group>"; };
@@ -374,6 +378,9 @@
 			isa = PBXGroup;
 			children = (
 				9538E50C552F040C296E7026BB066B06 /* MNkImageSlider.swift */,
+				77DA363B2317E5D100AF2C70 /* Enums.swift */,
+				77DA363C2317E5D200AF2C70 /* Protocols.swift */,
+				77DA363A2317E5D100AF2C70 /* SliderAnimator.swift */,
 				AC6F5BB767736E38DF75E9E8090E66BC /* Indicator */,
 				F8FC0AEAED04B3CE5D92F281B29636F9 /* Slider */,
 				9D0FFCA335978D4676D6E7B65EA2E46A /* Pod */,
@@ -491,7 +498,6 @@
 		F8FC0AEAED04B3CE5D92F281B29636F9 /* Slider */ = {
 			isa = PBXGroup;
 			children = (
-				F42D040146A376D2C1C6455B125A05E1 /* Slider.swift */,
 				606E21850B5BB8FD1AEC69B5A4D1CFA2 /* SliderCell.swift */,
 			);
 			name = Slider;
@@ -822,8 +828,10 @@
 				6DB6D785B124AAF3E09384E16CCA3F0E /* ItemIndicators.swift in Sources */,
 				1E1B125489046510F05EA49CD9EC5799 /* MNkImageSlider-dummy.m in Sources */,
 				D4DDD7811ECDFC065230BA1548002E92 /* MNkImageSlider.swift in Sources */,
-				96E8E784931374DBF746828144F69848 /* Slider.swift in Sources */,
+				77DA363E2317E5D200AF2C70 /* Enums.swift in Sources */,
 				87E7CEDB50D69D9CA5C15BEFBE91051E /* SliderCell.swift in Sources */,
+				77DA363D2317E5D200AF2C70 /* SliderAnimator.swift in Sources */,
+				77DA363F2317E5D200AF2C70 /* Protocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

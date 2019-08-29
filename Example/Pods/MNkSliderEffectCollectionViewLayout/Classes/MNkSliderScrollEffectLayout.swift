@@ -31,11 +31,7 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
     /*............................................................
      Mark:-You can publicly access this properties to make chnages.
      ...........................................................*/
-    public var delegate:MNkSliderScrollEffectLayoutProtocol?{
-        didSet{
-            collectionView?.reload()
-        }
-    }
+    internal var delegate:MNkSliderScrollEffectLayoutProtocol?
     public var minScaleFactor:CGFloat = 0.8
     public var minAlphaFactor:CGFloat = 1.0
     public var isPaginEnabled:Bool = false{
@@ -46,7 +42,7 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
     public var interItemSpace:CGFloat = 10
     public var displayPosition:ActiveCellDisplayPosition = .left{
         didSet{
-            collectionView?.contentInset = contentInset(forDisplay: displayPosition)
+            contentInset(forDisplay: displayPosition)
         }
     }
     public var cache = [UICollectionViewLayoutAttributes]()
@@ -107,7 +103,6 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
         return pagingPoint.activeCellOffSetX
     }
     
-    
     /*.......................................................................
      Mark:-Prepare Layout attribute for given item from datasourse protocol
      ............................................................................*/
@@ -136,7 +131,7 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
      Mark:-Configuration for default layourt behaviour
      .......................................................................*/
     private func configLayoutDefaultOp(){
-        collectionView?.contentInset = contentInset(forDisplay: displayPosition)
+        contentInset(forDisplay: displayPosition)
         _displayIndexPath = activectiveIndexInReload()
     }
     
@@ -180,26 +175,30 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
      Mark:- Set content inset value of collectionview acording to cell dispaly position.
      - Using this method, we can visible first once also last one as active cell at display point.
      .............................................................................................*/
-    private func contentInset(forDisplay position:ActiveCellDisplayPosition)->UIEdgeInsets{
-        guard let cv = collectionView else{return .zero}
+    private func contentInset(forDisplay position:ActiveCellDisplayPosition){
+        guard let cv = collectionView else{return}
+        
+        var inset:UIEdgeInsets
+        
         switch position{
         case .left:
-            return UIEdgeInsets.init(top: 0,
+            inset =  UIEdgeInsets.init(top: 0,
                                      left: 0,
                                      bottom: 0,
                                      right: cv.bounds.size.width - (cellSize.width+interItemSpace))
         case .right:
-            return UIEdgeInsets.init(top: 0,
+            inset = UIEdgeInsets.init(top: 0,
                                      left: cv.bounds.size.width - (cellSize.width+(interItemSpace*2)),
                                      bottom: 0,
                                      right: interItemSpace)
         case .middle:
             let sidePadding = (cv.bounds.size.width / 2) - (cellSize.width/2)
-            return UIEdgeInsets.init(top: 0,
+            inset =  UIEdgeInsets.init(top: 0,
                                      left: sidePadding,
                                      bottom: 0,
                                      right: sidePadding)
         }
+        cv.contentInset = inset
     }
     
 }
@@ -256,7 +255,6 @@ extension MNkSliderScrollEffectLayout{
                                    forDisplay position:ActiveCellDisplayPosition,
                                    in cv:UICollectionView,
                                    _ proposeOffSet:CGPoint)->CGPoint{
-        
         let posY:CGFloat = proposeOffSet.y
         let posX:CGFloat
         
@@ -269,5 +267,10 @@ extension MNkSliderScrollEffectLayout{
             posX = attrib.center.x - (cv.bounds.size.width/2)
         }
         return CGPoint.init(x: posX, y: posY)
+    }
+    
+    ///Set Display cell for animated content offSet
+    public func setDisplayCellForAnimated(offSet point:CGPoint){
+        _displayIndexPath = pagingPoint(for: point).activeIndexPath
     }
 }

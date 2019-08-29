@@ -15,12 +15,28 @@ class ViewController: UIViewController {
     
     let data =  [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile")]
     
+    private var proImgSlider:MNkImageSlider!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-         imageSliderStoryBoard.slider.register(slider: SliderSample.self, with: "test")
-         imageSliderStoryBoard.sliderDataSource = self
+        imageSliderStoryBoard.register(slider: SliderSample.self, with: "test")
+        imageSliderStoryBoard.datasource = self
         imageSliderStoryBoard.delegate = self
-         imageSliderStoryBoard.imagesData = data
+//        imageSliderStoryBoard.imagesData = data
+        
+        proImgSlider = MNkImageSlider()
+        proImgSlider.register(slider: SliderSample.self, with: "test")
+        proImgSlider.datasource = self
+        proImgSlider.delegate = self
+//        proImgSlider.imagesData = data
+        proImgSlider.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(proImgSlider)
+        NSLayoutConstraint.activate([proImgSlider.topAnchor.constraint(equalTo: imageSliderStoryBoard.bottomAnchor,
+                                                                       constant: 20),
+                                     proImgSlider.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+                                     proImgSlider.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+                                     proImgSlider.heightAnchor.constraint(equalToConstant: 200)])
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -29,8 +45,16 @@ class ViewController: UIViewController {
         imageSliderStoryBoard.isRepeat = true
         imageSliderStoryBoard.delay = 5
         imageSliderStoryBoard.indicator.selectedColor = .red
-        imageSliderStoryBoard.size = .two
-        imageSliderStoryBoard.isActiveIndicator = false
+        imageSliderStoryBoard.sliderSize = .two
+        imageSliderStoryBoard.isActiveIndicator = true
+        
+        proImgSlider.playSlider()
+        proImgSlider.isRepeat = true
+        proImgSlider.delay = 5
+        proImgSlider.indicator.selectedColor = .red
+        proImgSlider.sliderSize = .two
+        proImgSlider.isActiveIndicator = true
+        proImgSlider.repeatFactor = 2
     }
     
     
@@ -38,11 +62,21 @@ class ViewController: UIViewController {
 
 
 extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
-    func mnkSliderNumberOfItems(in slider: Slider) -> Int {
-        return data.count
-    }
+//    func mnkSliderNumberOfItems(in slider: Slider) -> Int {
+//        return data.count
+//    }
     
-    func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
+    func mnkSliderNumberOfItems(in slider: MNkImageSlider) -> Int {
+         return data.count
+    }
+//    func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
+//        let cell = slider.dequeSliderCell(with: "test", for: indexPath) as! SliderSample
+//        cell.label.text = "\(indexPath)"
+//        cell.imageData = data[indexPath.item]
+//        return cell
+//    }
+    
+    func mnkSliderItemCell(in slider: MNkImageSlider, for indexPath: IndexPath) -> SliderCell{
         let cell = slider.dequeSliderCell(with: "test", for: indexPath) as! SliderSample
         cell.label.text = "\(indexPath)"
         cell.imageData = data[indexPath.item]
@@ -52,6 +86,10 @@ extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
     func userScrolled(_ sliderData: Any?, atCellIndex indexPath: IndexPath, of cell: SliderCell) {
         print("Scrolled: ",indexPath.item)
     }
+    
+//    func mnkSliderSizeForItem(at indexPath: IndexPath, of collectionView: UICollectionView) -> CGSize {
+//        return CGSize.init(width: collectionView.bounds.size.width/2, height: collectionView.bounds.size.height)
+//    }
 }
 
 

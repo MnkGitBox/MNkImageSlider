@@ -34,6 +34,7 @@ public extension UICollectionView{
         set{
             (collectionViewLayout as? MNkSliderScrollEffectLayout)?.delegate = newValue
         }
+        
     }
 }
 

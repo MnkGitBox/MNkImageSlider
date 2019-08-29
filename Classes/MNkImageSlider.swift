@@ -5,42 +5,10 @@
 //  Copyright © 2017 MNkApps. All rights reserved.
 //
 
-public protocol MNkSliderCompatable{
-    var imageUrl:URL?{get}
-    var link:URL?{get}
-}
-
-public extension MNkSliderCompatable{
-    var link:URL?{
-        return nil
-    }
-}
-
-
-public protocol MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell)
-    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath)
-}
-public extension MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell){}
-    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath){}
-}
+import MNkSliderEffectCollectionViewLayout
+import UIKit
 
 open class MNkImageSlider: UIView {
-    public enum Sizes:Int{
-        case full = 1
-        case two = 2
-        case three = 3
-        case four = 4
-        case five = 5
-    }
-    
-    
-    public enum SliderDirection:Int{
-        case forward = 0
-        case backward = 1
-    }
-    
     
     /*....................................
      Mark:- Public configurable paramters
@@ -58,35 +26,23 @@ open class MNkImageSlider: UIView {
             layoutIfNeeded()
         }
     }
-    
-    public var imagesData:[Any] = []{
-        didSet{
-            reloadData()
-        }
-    }
-    
+
     public var delegate:MNkSliderDelegate?
-    public var sliderDataSource:MNkSliderDataSource?
-    
-    var datasource:SliderDataSource?
-    
-    @IBInspectable public var isRepeat:Bool = false{
-        didSet{
-            slider.isRepeat = isRepeat
-        }
-    }
+    public var datasource:MNkSliderDataSource?
+
+    @IBInspectable public var isRepeat:Bool = false
     
     public var delay = TimeInterval(5){
         didSet{
             guard isAnimating else{return}
             stopSlider()
-            startSliderAnimation()
+            playSlider()
         }
     }
     
-    public var size:Sizes = .full{
+    public var sliderSize:Sizes = .full{
         didSet{
-            slider.size = size
+            collectionView.reload()
         }
     }
     
@@ -98,18 +54,28 @@ open class MNkImageSlider: UIView {
         }
     }
     
+    public var repeatFactor:Int = 100{
+        didSet{
+            collectionView.reload()
+        }
+    }
+    
     
     /*...................
      Mark:- public views
      ....................*/
     public var indicator:ItemIndicators!
     
-    public var slider:Slider!
-    
-    
     /*....................................
      Mark:- private  parameters
      .....................................*/
+    private var sliderCell:String{
+        return "sliderCell"
+    }
+    var collectionView:UICollectionView!
+    
+    var layout:MNkSliderScrollEffectLayout!
+    
     private var currImgIndex:Int = 0
     
     private var indicatorBottomConstant:NSLayoutConstraint?
@@ -122,9 +88,14 @@ open class MNkImageSlider: UIView {
     
     private var sliderDirection:SliderDirection = .forward
     
+    private var animator:SliderAnimator!
     
-    
-    
+    private var numberOfItems:Int{
+        guard let items = datasource?.mnkSliderNumberOfItems(in: self) else{
+            return 0
+        }
+        return items
+    }
     
     
     
@@ -133,179 +104,164 @@ open class MNkImageSlider: UIView {
      Mark:- Create layout and configure views
      .......................................*/
     private func createViews(){
-        slider = Slider(sliderDirection, size)
-        slider.sliderDataSource = self
-        slider.dataSource = self
-        slider.delegate = self
-        slider.translatesAutoresizingMaskIntoConstraints = false
+
+        layout = MNkSliderScrollEffectLayout()
+        layout.interItemSpace = 0
+        layout.minScaleFactor = 1.0
+        layout.displayPosition = .middle
+        layout.isPaginEnabled = true
         
-        indicator = ItemIndicators(imagesData.count)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.sliderScrollEffectDelegate = self
+        collectionView.backgroundColor = .white
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        
+        indicator = ItemIndicators(numberOfItems)
         indicator.translatesAutoresizingMaskIntoConstraints = false
+        
+        animator = SliderAnimator()
+        animator.slider = self
     }
     
     private func insertAndLayoutViews(){
-        addSubview(slider)
+        addSubview(collectionView)
         addSubview(indicator)
         
-        NSLayoutConstraint.activate([slider.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                                     slider.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                                     slider.topAnchor.constraint(equalTo: self.topAnchor),
-                                     slider.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
+        NSLayoutConstraint.activate([collectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                                     collectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+                                     collectionView.topAnchor.constraint(equalTo: self.topAnchor),
+                                     collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
         
         indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
         indicatorBottomConstant?.isActive = true
         NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
-        
-        
+    }
+    private func config(){
+        collectionView.register(SliderCell.self, forCellWithReuseIdentifier: sliderCell)
+        collectionView.backgroundColor = .clear
+        backgroundColor = .clear
     }
     
+    
+    /*....................................
+     Mark:- Register custom cell to Slider
+     .....................................*/
+    public func register(slider cell:AnyClass?,with identifier:String){
+        collectionView.register(cell.self, forCellWithReuseIdentifier: identifier)
+    }
+    
+    
+    
     public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward,_ size:Sizes = .full) {
-        self.size = size
+        self.sliderSize = size
         self.sliderDirection = direction
         super.init(frame: frame)
         createViews()
         insertAndLayoutViews()
-        
+        config()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder : aDecoder)
         createViews()
         insertAndLayoutViews()
+        config()
     }
     
-    
-    
-    
-    
-    
-    
+
     /*.........................................
      Mark:- Animation controll func going here
      .........................................*/
-    
     public func playSlider(){
         isUserStartAnimating = true
-        startSliderAnimation()
-    }
-    
-    private func startSliderAnimation(){
-        guard !imagesData.isEmpty,
-            isUserStartAnimating
-            else {return}
-        timer = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(animateCell), userInfo: nil, repeats: true)
-        isAnimating = true
-    }
-    
-    @objc private func animateCell(){
-        if slider.isLastItem,isActiveIndicator{indicator.activeIndex = 0}
-        slider.animateSlider()
+        animator.start(fromSlide: IndexPath.init(row: 0, section: 0))
     }
     
     public func stopSlider(){
         guard isAnimating else{return}
-        timer?.invalidate()
-        timer = nil
-        isAnimating = false
+        animator.stop()
     }
-    
-    
-    
-    
-    
-    
+
     /*.........................................
      Mark:- Animation controll func going here
      .........................................*/
     public func reloadData(){
-        slider.reloadData()
+        collectionView.reload()
         
         guard isActiveIndicator else{return}
-        indicator.items = imagesData.count
+        indicator.items = numberOfItems
         indicator.activeIndex = currImgIndex
     }
-    
-    func removeAll(){
-        imagesData.removeAll()
-        imagesData = []
+
+    private func selectedItemIndex(using currentIndexPath:IndexPath)->Int{
+        let currScrollIndex = CGFloat(currentIndexPath.item)
+        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(numberOfItems))
+        guard sliderDirection == .backward else{return Int(itemIndex)}
+        let backWardIndex = (numberOfItems - 1) - Int(itemIndex)
+        return backWardIndex
+    }
+    /*..................................................................................
+     Mark:- Get item index acording to current indexPath
+     This for looping sliders countinuesly when user scroll view slider right or left.
+     ...................................................................................*/
+    public func itemIndex(for indexPath:IndexPath)->IndexPath{
+        guard isRepeat else{return indexPath}
+        let itemsLoopTimes = CGFloat(indexPath.item / numberOfItems).rounded(.down)
+        let itemsLoopedUnion = CGFloat(numberOfItems) * itemsLoopTimes
+        let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
+        return IndexPath(item: indexItem, section: indexPath.section)
     }
     
-    
-    
-    /*.........................................
-     Mark:- Send Current visible slider data
-     .........................................*/
-    private func sendSelectedData(){
-        let indexPath = slider.layout.displayIndexPath
-        guard let sliderCell = slider.collectionView.cellForItem(at: indexPath) as? SliderCell else{return}
-        delegate?.userScrolled(sliderCell.imageData, atCellIndex: indexPath, of: sliderCell)
-    }
-    
-}
-
-
-
-
-
-
-/*.....................................
- Mark:- Slider Delegate methods impli
- ......................................*/
-extension MNkImageSlider:SliderDelegate{
-    func didSelectSlider(item: Any, _ cell: SliderCell, at indexPath: IndexPath) {
-        delegate?.userTappedSlider(item, cell, at: indexPath)
-    }
-    
-    func sliderBegainDragging() {
-        stopSlider()
-    }
-    
-    func sliderEndDragging() {
-       
-        startSliderAnimation()
-    }
-    
-    func sliderScrolledPage(_ pageIndex: Int) {
-        guard pageIndex != currImgIndex else{return}
-        currImgIndex = pageIndex
-        sendSelectedData()
-        
-        guard isActiveIndicator else{return}
-         indicator.activeIndex = currImgIndex
-    }
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-/*.....................................
- Mark:- Slider DataSource methods impli
- ......................................*/
-extension MNkImageSlider:SliderDataSource{
-    public func itemsForSlider() -> [Any] {
-        return imagesData
+    public func dequeSliderCell(with identifier:String,for indexPath:IndexPath)->SliderCell{
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? SliderCell else{fatalError("could not dequeue a view of kind: SliderCell with identifier \(identifier) - must register class for the identifier using slider. register(slider view:AnyClass?,with identifier:String")}
+        return cell
     }
 }
 
-
-extension MNkImageSlider:MNkSliderDataSource{
-    public func mnkSliderNumberOfItems(in slider: Slider) -> Int {
-        return sliderDataSource?.mnkSliderNumberOfItems(in: slider) ?? 1
+/*...................................................
+ Mark:- Collectionview delegate and datasource impli.
+ ....................................................*/
+extension MNkImageSlider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutProtocol,UICollectionViewDelegate{
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        guard !isRepeat else{
+            return numberOfItems * repeatFactor
+        }
+        return numberOfItems
     }
     
-    public func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
-        return sliderDataSource?.mnkSliderItemCell(in: slider, for: indexPath)
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let itemIndexPath = itemIndex(for: indexPath)
+        let cell = datasource!.mnkSliderItemCell(in: self, for: itemIndexPath)
+        return cell
     }
+
+    public func collectionview(_ collectionView: UICollectionView, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        guard let delegateSize = delegate?.mnkSliderSizeForItem(at: indexPath, of: collectionView) else{
+            return collectionView.bounds.size
+        }
+        return delegateSize
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at:indexPath) as? SliderCell,
+            let imageData = cell.imageData else{return}
+        delegate?.didSelectSlider(item: imageData, cell, at: itemIndex(for: indexPath))
+    }
+    
+    public func sliderCollectionView(activeCell indexPath: IndexPath, in collectionView: UICollectionView, with layout: MNkSliderScrollEffectLayout) {
+        let selectedItemIndex = self.selectedItemIndex(using: indexPath)
+        delegate?.sliderScrolledPage(selectedItemIndex)
+    }
+    
+    
+    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        layout.setDisplayCellForAnimated(offSet: scrollView.contentOffset)
+    }
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView.contentOffset.x == layout.interItemSpace else{return}
+        layout.setDisplayCellForAnimated(offSet: scrollView.contentOffset)
+    }
+  
 }
-
-
-
-

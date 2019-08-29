@@ -87,11 +87,11 @@ public class SliderAnimator:NSObject{
      ....................................................................................................*/
     ///Create animation attruibutes for animated precentage for display position.
     open func animatorAttibutes(using attribs:[UICollectionViewLayoutAttributes],
-                               atDisplay position:ActiveCellDisplayPosition)->[UICollectionViewLayoutAttributes]{
-       
+                                atDisplay position:ActiveCellDisplayPosition)->[UICollectionViewLayoutAttributes]{
+        
         for var attrib in attribs{
-          attrib = animatorAttribute(using: attrib,
-                             atDisplay: position)
+            attrib = animatorAttribute(using: attrib,
+                                       atDisplay: position)
         }
         
         return attribs

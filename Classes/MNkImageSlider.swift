@@ -32,9 +32,9 @@ open class MNkImageSlider: UIView {
 
     @IBInspectable public var isRepeat:Bool = false
     
-    public var delay = TimeInterval(5){
+    public var delay:Double = 5.0{
         didSet{
-            guard isAnimating else{return}
+            animator.animationIntervals = delay
             stopSlider()
             playSlider()
         }
@@ -60,6 +60,11 @@ open class MNkImageSlider: UIView {
         }
     }
     
+    public var slideActivePosition:ActiveCellDisplayPosition = .left{
+        didSet{
+            layout.displayPosition = slideActivePosition
+        }
+    }
     
     /*...................
      Mark:- public views
@@ -79,13 +84,7 @@ open class MNkImageSlider: UIView {
     private var currImgIndex:Int = 0
     
     private var indicatorBottomConstant:NSLayoutConstraint?
-    
-    private var isAnimating:Bool = false
-    
-    private var isUserStartAnimating:Bool = false
-    
-    private var timer:Timer?
-    
+
     private var sliderDirection:SliderDirection = .forward
     
     private var animator:SliderAnimator!
@@ -105,9 +104,9 @@ open class MNkImageSlider: UIView {
      .......................................*/
     private func createViews(){
 
-        layout = MNkSliderScrollEffectLayout()
+        layout = sliderDirection == .forward ?  MNkSliderScrollEffectLayout() : BackwardSliderLayout()
         layout.interItemSpace = 0
-        layout.minScaleFactor = 1.0
+        layout.minScaleFactor = 0.8
         layout.displayPosition = .middle
         layout.isPaginEnabled = true
         
@@ -123,6 +122,7 @@ open class MNkImageSlider: UIView {
         
         animator = SliderAnimator()
         animator.slider = self
+        animator.direction = sliderDirection
     }
     
     private func insertAndLayoutViews(){
@@ -175,12 +175,10 @@ open class MNkImageSlider: UIView {
      Mark:- Animation controll func going here
      .........................................*/
     public func playSlider(){
-        isUserStartAnimating = true
         animator.start(fromSlide: IndexPath.init(row: 0, section: 0))
     }
     
     public func stopSlider(){
-        guard isAnimating else{return}
         animator.stop()
     }
 
@@ -195,13 +193,6 @@ open class MNkImageSlider: UIView {
         indicator.activeIndex = currImgIndex
     }
 
-    private func selectedItemIndex(using currentIndexPath:IndexPath)->Int{
-        let currScrollIndex = CGFloat(currentIndexPath.item)
-        let itemIndex = currScrollIndex.truncatingRemainder(dividingBy: CGFloat(numberOfItems))
-        guard sliderDirection == .backward else{return Int(itemIndex)}
-        let backWardIndex = (numberOfItems - 1) - Int(itemIndex)
-        return backWardIndex
-    }
     /*..................................................................................
      Mark:- Get item index acording to current indexPath
      This for looping sliders countinuesly when user scroll view slider right or left.
@@ -210,7 +201,12 @@ open class MNkImageSlider: UIView {
         guard isRepeat else{return indexPath}
         let itemsLoopTimes = CGFloat(indexPath.item / numberOfItems).rounded(.down)
         let itemsLoopedUnion = CGFloat(numberOfItems) * itemsLoopTimes
-        let indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
+        var indexItem = Int(CGFloat(indexPath.item) - itemsLoopedUnion)
+        
+        if sliderDirection == .backward{
+            indexItem = (numberOfItems-1) - indexItem
+        }
+        
         return IndexPath(item: indexItem, section: indexPath.section)
     }
     
@@ -218,6 +214,8 @@ open class MNkImageSlider: UIView {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? SliderCell else{fatalError("could not dequeue a view of kind: SliderCell with identifier \(identifier) - must register class for the identifier using slider. register(slider view:AnyClass?,with identifier:String")}
         return cell
     }
+    
+    var activeIndex:IndexPath?
 }
 
 /*...................................................
@@ -247,21 +245,28 @@ extension MNkImageSlider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutP
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = collectionView.cellForItem(at:indexPath) as? SliderCell,
             let imageData = cell.imageData else{return}
-        delegate?.didSelectSlider(item: imageData, cell, at: itemIndex(for: indexPath))
+        delegate?.mnkSliderDidSelectSlider(item: imageData, cell, at: indexPath)
     }
     
     public func sliderCollectionView(activeCell indexPath: IndexPath, in collectionView: UICollectionView, with layout: MNkSliderScrollEffectLayout) {
-        let selectedItemIndex = self.selectedItemIndex(using: indexPath)
-        delegate?.sliderScrolledPage(selectedItemIndex)
+        let cell = collectionView.cellForItem(at:indexPath) as? SliderCell
+        delegate?.mnkSliderScrolled(toSlider: itemIndex(for: indexPath), of: cell)
     }
-    
     
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         layout.setDisplayCellForAnimated(offSet: scrollView.contentOffset)
     }
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView.contentOffset.x == layout.interItemSpace else{return}
-        layout.setDisplayCellForAnimated(offSet: scrollView.contentOffset)
+    
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        print("Stop")
+        stopSlider()
+        delegate?.mnkSliderBegainDragging()
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        print("Start")
+        playSlider()
+        delegate?.mnkSliderEndDragging()
     }
   
 }

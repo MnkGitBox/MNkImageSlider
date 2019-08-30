@@ -9,6 +9,7 @@ import Foundation
 
 class SliderAnimator:NSObject{
     var slider:MNkImageSlider!
+    var direction:SliderDirection = .forward
     
     var animationIntervals:Double = 2.0
     var isAnimating:Bool = false
@@ -42,20 +43,59 @@ class SliderAnimator:NSObject{
     }
     
     @objc private func setAnimation(_ info:Timer){
+        switch direction{
+        case .forward:
+            animateForward()
+        case .backward:
+            animateBackward()
+        }
+    }
+    
+    private func animateForward(){
         
-        let isFinalIndex = currIndexPath.item >= (numberOfSliders-1)
-        let indexPath = isFinalIndex ? IndexPath.init(item: 0, section: 0) : currIndexPath
+        let indexPath = slider.layout.pagingPoint(for: cv.contentOffset).activeIndexPath
+        let initContentInsetLeft = slider.layout.contentInset(forDisplay: slider.layout.displayPosition).left
+        let isFinalIndex = indexPath.item >= (numberOfSliders-1)
         let isAnimated = isFinalIndex ? false : true
         guard let layoutAttrib = slider.layout.layoutAttributesForItem(at: indexPath) else{
             stop()
             return
         }
+       
+        let point = CGPoint.init(x: -initContentInsetLeft, y: cv.contentOffset.y)
+        let newOffSet = isFinalIndex ?  point : CGPoint.init(x: (cv.contentOffset.x + layoutAttrib.size.width + (slider.layout.interItemSpace)),
+                                                            y: cv.contentOffset.y)
         
-        let newOffSet = isFinalIndex ? .zero : CGPoint.init(x: (cv.contentOffset.x + layoutAttrib.size.width + (slider.layout.interItemSpace)),
-                                                    y: cv.contentOffset.y)
-
-        print(isFinalIndex,newOffSet,indexPath)
         
         cv.setContentOffset(newOffSet, animated: isAnimated)
+        
+        if isFinalIndex{
+            slider.layout.setDisplayCellForAnimated(offSet: cv.contentOffset)
+        }
+    }
+    
+    private func animateBackward(){
+        guard let layout = slider.layout as? BackwardSliderLayout else{
+            stop()
+            return
+        }
+        let initContentOffSet = layout.initContentInsetForDisplayPosition()
+        let indexPath = slider.layout.pagingPoint(for: cv.contentOffset).activeIndexPath
+        let isFinalIndex = indexPath.item <= 0
+        let isAnimated = isFinalIndex ? false : true
+        
+        guard let layoutAttrib = slider.layout.layoutAttributesForItem(at: indexPath) else{
+            stop()
+            return
+        }
+        
+        let newOffSet = isFinalIndex ? initContentOffSet : CGPoint.init(x: (cv.contentOffset.x - layoutAttrib.size.width - (slider.layout.interItemSpace)),
+                                                            y: cv.contentOffset.y)
+     
+        cv.setContentOffset(newOffSet, animated: isAnimated)
+        
+        if isFinalIndex{
+            slider.layout.setDisplayCellForAnimated(offSet: cv.contentOffset)
+        }
     }
 }

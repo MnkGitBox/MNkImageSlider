@@ -21,14 +21,15 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         imageSliderStoryBoard.register(slider: SliderSample.self, with: "test")
         imageSliderStoryBoard.datasource = self
-        imageSliderStoryBoard.delegate = self
-//        imageSliderStoryBoard.imagesData = data
+//        imageSliderStoryBoard.delegate = sel
+        imageSliderStoryBoard.slideActivePosition = .middle
         
-        proImgSlider = MNkImageSlider()
+        
+        proImgSlider = MNkImageSlider.init(frame: .zero, .backward)
         proImgSlider.register(slider: SliderSample.self, with: "test")
         proImgSlider.datasource = self
         proImgSlider.delegate = self
-//        proImgSlider.imagesData = data
+        proImgSlider.slideActivePosition = .middle
         proImgSlider.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(proImgSlider)
@@ -41,18 +42,18 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        imageSliderStoryBoard.playSlider()
+//        imageSliderStoryBoard.playSlider()
         imageSliderStoryBoard.isRepeat = true
-        imageSliderStoryBoard.delay = 5
+        imageSliderStoryBoard.delay = 1
         imageSliderStoryBoard.indicator.selectedColor = .red
         imageSliderStoryBoard.sliderSize = .two
         imageSliderStoryBoard.isActiveIndicator = true
         
         proImgSlider.playSlider()
         proImgSlider.isRepeat = true
-        proImgSlider.delay = 5
+        proImgSlider.delay = 1
         proImgSlider.indicator.selectedColor = .red
-        proImgSlider.sliderSize = .two
+//        proImgSlider.sliderSize = .two
         proImgSlider.isActiveIndicator = true
         proImgSlider.repeatFactor = 2
     }
@@ -62,19 +63,10 @@ class ViewController: UIViewController {
 
 
 extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
-//    func mnkSliderNumberOfItems(in slider: Slider) -> Int {
-//        return data.count
-//    }
-    
+
     func mnkSliderNumberOfItems(in slider: MNkImageSlider) -> Int {
          return data.count
     }
-//    func mnkSliderItemCell(in slider: Slider, for indexPath: IndexPath) -> SliderCell? {
-//        let cell = slider.dequeSliderCell(with: "test", for: indexPath) as! SliderSample
-//        cell.label.text = "\(indexPath)"
-//        cell.imageData = data[indexPath.item]
-//        return cell
-//    }
     
     func mnkSliderItemCell(in slider: MNkImageSlider, for indexPath: IndexPath) -> SliderCell{
         let cell = slider.dequeSliderCell(with: "test", for: indexPath) as! SliderSample
@@ -83,13 +75,13 @@ extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
         return cell
     }
     
-    func userScrolled(_ sliderData: Any?, atCellIndex indexPath: IndexPath, of cell: SliderCell) {
-        print("Scrolled: ",indexPath.item)
+    func mnkSliderSizeForItem(at indexPath: IndexPath, of collectionView: UICollectionView) -> CGSize {
+        return CGSize.init(width: collectionView.bounds.size.width/2, height: collectionView.bounds.size.height)
     }
     
-//    func mnkSliderSizeForItem(at indexPath: IndexPath, of collectionView: UICollectionView) -> CGSize {
-//        return CGSize.init(width: collectionView.bounds.size.width/2, height: collectionView.bounds.size.height)
-//    }
+    func mnkSliderScrolled(toSlider indexPath: IndexPath, of cell: SliderCell?) {
+       print("Scrolled: ",indexPath.item)
+    }
 }
 
 

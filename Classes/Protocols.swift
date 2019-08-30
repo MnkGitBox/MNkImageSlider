@@ -24,21 +24,17 @@ public extension MNkSliderCompatable{
 
 
 public protocol MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell)
-    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath)
-    func sliderBegainDragging()
-    func sliderEndDragging()
-    func sliderScrolledPage(_ pageIndex:Int)
-    func didSelectSlider(item:Any,_ cell:SliderCell,at indexPath:IndexPath)
+    func mnkSliderScrolled(toSlider indexPath:IndexPath,of cell:SliderCell?)
+    func mnkSliderBegainDragging()
+    func mnkSliderEndDragging()
+    func mnkSliderDidSelectSlider(item:Any,_ cell:SliderCell,at indexPath:IndexPath)
     func mnkSliderSizeForItem(at indexPath:IndexPath,of collectionView:UICollectionView)->CGSize
 }
 public extension MNkSliderDelegate{
-    func userScrolled(_ sliderData:Any?,atCellIndex indexPath:IndexPath,of cell:SliderCell){}
-    func userTappedSlider(_ item:Any,_ cell:SliderCell,at indexPath:IndexPath){}
-    func sliderBegainDragging(){}
-    func sliderEndDragging(){}
-    func sliderScrolledPage(_ pageIndex:Int){}
-    func didSelectSlider(item:Any,_ cell:SliderCell,at indexPath:IndexPath){}
+    func mnkSliderScrolled(toSlider indexPath:IndexPath,of cell:SliderCell?){}
+    func mnkSliderBegainDragging(){}
+    func mnkSliderEndDragging(){}
+    func mnkSliderDidSelectSlider(item:Any,_ cell:SliderCell,at indexPath:IndexPath){}
     func mnkSliderSizeForItem(at indexPath:IndexPath,of collectionView:UICollectionView)->CGSize{
         return collectionView.bounds.size
     }

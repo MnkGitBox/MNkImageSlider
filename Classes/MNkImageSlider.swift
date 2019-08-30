@@ -30,19 +30,18 @@ open class MNkImageSlider: UIView {
     public var delegate:MNkSliderDelegate?
     public var datasource:MNkSliderDataSource?
 
-    @IBInspectable public var isRepeat:Bool = false
-    
-    public var delay:Double = 5.0{
+    @IBInspectable public var isRepeat:Bool = false{
         didSet{
-            animator.animationIntervals = delay
-            stopSlider()
-            playSlider()
+            collectionView.reload()
         }
     }
     
-    public var sliderSize:Sizes = .full{
+    public var delay:Double = 1.0{
         didSet{
-            collectionView.reload()
+            animator.animationIntervals = delay
+            guard isAnimate else{return}
+            stopSlider()
+            playSlider()
         }
     }
     
@@ -63,6 +62,46 @@ open class MNkImageSlider: UIView {
     public var slideActivePosition:ActiveCellDisplayPosition = .left{
         didSet{
             layout.displayPosition = slideActivePosition
+        }
+    }
+    
+    public var interItemSpace:CGFloat = 0{
+        didSet{
+            layout.interItemSpace = interItemSpace
+        }
+    }
+    
+    public var minScaleFactor:CGFloat = 1.0{
+        didSet{
+            layout.minScaleFactor = minScaleFactor
+        }
+    }
+    
+    public var minAphaFactor:CGFloat = 1.0{
+        didSet{
+            layout.minAlphaFactor = minAphaFactor
+        }
+    }
+    
+    public var activePosition:ActiveCellDisplayPosition = .left{
+        didSet{
+            layout.displayPosition = activePosition
+        }
+    }
+    
+    public var isPagingEnabled:Bool = true{
+        didSet{
+            layout.isPaginEnabled = isPagingEnabled
+        }
+    }
+    
+    public var isAnimate:Bool = false{
+        didSet{
+            guard isAnimate else{
+                stopSlider()
+                return
+            }
+            playSlider()
         }
     }
     
@@ -98,17 +137,16 @@ open class MNkImageSlider: UIView {
     
     
     
-    
     /*.......................................
      Mark:- Create layout and configure views
      .......................................*/
     private func createViews(){
 
         layout = sliderDirection == .forward ?  MNkSliderScrollEffectLayout() : BackwardSliderLayout()
-        layout.interItemSpace = 0
-        layout.minScaleFactor = 0.8
-        layout.displayPosition = .middle
-        layout.isPaginEnabled = true
+        layout.interItemSpace = interItemSpace
+        layout.minScaleFactor = minScaleFactor
+        layout.displayPosition = activePosition
+        layout.isPaginEnabled = isPagingEnabled
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
@@ -123,6 +161,7 @@ open class MNkImageSlider: UIView {
         animator = SliderAnimator()
         animator.slider = self
         animator.direction = sliderDirection
+        animator.animationIntervals = delay
     }
     
     private func insertAndLayoutViews(){
@@ -154,8 +193,7 @@ open class MNkImageSlider: UIView {
     
     
     
-    public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward,_ size:Sizes = .full) {
-        self.sliderSize = size
+    public init(frame:CGRect = .zero,_ direction:SliderDirection = .forward) {
         self.sliderDirection = direction
         super.init(frame: frame)
         createViews()
@@ -174,11 +212,11 @@ open class MNkImageSlider: UIView {
     /*.........................................
      Mark:- Animation controll func going here
      .........................................*/
-    public func playSlider(){
-        animator.start(fromSlide: IndexPath.init(row: 0, section: 0))
+    private func playSlider(){
+        animator.start()
     }
     
-    public func stopSlider(){
+    private func stopSlider(){
         animator.stop()
     }
 
@@ -214,8 +252,7 @@ open class MNkImageSlider: UIView {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? SliderCell else{fatalError("could not dequeue a view of kind: SliderCell with identifier \(identifier) - must register class for the identifier using slider. register(slider view:AnyClass?,with identifier:String")}
         return cell
     }
-    
-    var activeIndex:IndexPath?
+ 
 }
 
 /*...................................................
@@ -258,15 +295,25 @@ extension MNkImageSlider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutP
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        print("Stop")
-        stopSlider()
         delegate?.mnkSliderBegainDragging()
+        guard isAnimate else{return}
+        stopSlider()
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        print("Start")
-        playSlider()
         delegate?.mnkSliderEndDragging()
+        guard isAnimate else{return}
+        playSlider()
+    }
+    
+    public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        guard isAnimate else{return}
+        stopSlider()
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard isAnimate else{return}
+        playSlider()
     }
   
 }

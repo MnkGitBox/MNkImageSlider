@@ -42,18 +42,17 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-//        imageSliderStoryBoard.playSlider()
+        imageSliderStoryBoard.isAnimate = true
         imageSliderStoryBoard.isRepeat = true
-        imageSliderStoryBoard.delay = 1
+        imageSliderStoryBoard.delay = 2
         imageSliderStoryBoard.indicator.selectedColor = .red
-        imageSliderStoryBoard.sliderSize = .two
         imageSliderStoryBoard.isActiveIndicator = true
+        imageSliderStoryBoard.minScaleFactor = 0.2
         
-        proImgSlider.playSlider()
+//        proImgSlider.playSlider()
         proImgSlider.isRepeat = true
-        proImgSlider.delay = 1
+//        proImgSlider.delay = 2
         proImgSlider.indicator.selectedColor = .red
-//        proImgSlider.sliderSize = .two
         proImgSlider.isActiveIndicator = true
         proImgSlider.repeatFactor = 2
     }
@@ -81,6 +80,9 @@ extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
     
     func mnkSliderScrolled(toSlider indexPath: IndexPath, of cell: SliderCell?) {
        print("Scrolled: ",indexPath.item)
+    }
+    func mnkSliderDidSelectSlider(item: Any, _ cell: SliderCell, at indexPath: IndexPath) {
+        imageSliderStoryBoard.isAnimate = false
     }
 }
 

@@ -39,7 +39,11 @@ open class MNkSliderScrollEffectLayout:UICollectionViewLayout{
             collectionView?.decelerationRate = isPaginEnabled ? .fast : .normal
         }
     }
-    public var interItemSpace:CGFloat = 10
+    public var interItemSpace:CGFloat = 10{
+        didSet{
+            collectionView?.reload()
+        }
+    }
     public var displayPosition:ActiveCellDisplayPosition = .left{
         didSet{
            collectionView?.contentInset = contentInset(forDisplay: displayPosition)

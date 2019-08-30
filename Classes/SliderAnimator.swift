@@ -25,16 +25,15 @@ class SliderAnimator:NSObject{
         return slider.collectionView
     }
     
-    func start(fromSlide indexPath:IndexPath){
+    func start(){
         guard numberOfSliders > 0 else{return}
-        DispatchQueue.main.asyncAfter(deadline: .now() + animationIntervals) {
-            self.timer = Timer.scheduledTimer(timeInterval: self.animationIntervals,
-                                         target: self,
-                                         selector: #selector(self.setAnimation(_:)),
-                                         userInfo: nil,
-                                         repeats: true)
-        }
-       
+        timer = Timer.scheduledTimer(timeInterval: animationIntervals,
+                                     target: self,
+                                     selector: #selector(setAnimation(_:)),
+                                     userInfo: nil,
+                                     repeats: true)
+        timer?.tolerance = (animationIntervals/100)*10
+        RunLoop.current.add(timer!, forMode: .commonModes)
     }
     
     func stop(){
@@ -53,7 +52,8 @@ class SliderAnimator:NSObject{
     
     private func animateForward(){
         
-        let indexPath = slider.layout.pagingPoint(for: cv.contentOffset).activeIndexPath
+        let pagingPoint = slider.layout.pagingPoint(for: cv.contentOffset)
+        let indexPath = pagingPoint.activeIndexPath
         let initContentInsetLeft = slider.layout.contentInset(forDisplay: slider.layout.displayPosition).left
         let isFinalIndex = indexPath.item >= (numberOfSliders-1)
         let isAnimated = isFinalIndex ? false : true
@@ -62,10 +62,11 @@ class SliderAnimator:NSObject{
             return
         }
        
-        let point = CGPoint.init(x: -initContentInsetLeft, y: cv.contentOffset.y)
-        let newOffSet = isFinalIndex ?  point : CGPoint.init(x: (cv.contentOffset.x + layoutAttrib.size.width + (slider.layout.interItemSpace)),
-                                                            y: cv.contentOffset.y)
-        
+        let initialOffSet = CGPoint.init(x: -initContentInsetLeft, y: cv.contentOffset.y)
+        let nextSliderOffSet = CGPoint.init(x: pagingPoint.activeCellOffSetX.x+layoutAttrib.size.width,
+                                            y: pagingPoint.activeCellOffSetX.y)
+       
+        let newOffSet = isFinalIndex ?  initialOffSet : nextSliderOffSet
         
         cv.setContentOffset(newOffSet, animated: isAnimated)
         
@@ -89,8 +90,11 @@ class SliderAnimator:NSObject{
             return
         }
         
-        let newOffSet = isFinalIndex ? initContentOffSet : CGPoint.init(x: (cv.contentOffset.x - layoutAttrib.size.width - (slider.layout.interItemSpace)),
-                                                            y: cv.contentOffset.y)
+        let pagingPoint = slider.layout.pagingPoint(for: cv.contentOffset)
+        let nextSliderOffSet = CGPoint.init(x: pagingPoint.activeCellOffSetX.x-layoutAttrib.size.width,
+                                            y: pagingPoint.activeCellOffSetX.y)
+        
+        let newOffSet = isFinalIndex ? initContentOffSet : nextSliderOffSet
      
         cv.setContentOffset(newOffSet, animated: isAnimated)
         

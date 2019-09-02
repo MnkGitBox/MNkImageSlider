@@ -29,6 +29,36 @@ open class MNkImageSlider: UIView {
 
     public var delegate:MNkSliderDelegate?
     public var datasource:MNkSliderDataSource?
+    
+    public var isHorizontalIndicatorEnabled:Bool = true{
+        didSet{
+            collectionView.showsHorizontalScrollIndicator = isHorizontalIndicatorEnabled
+        }
+    }
+    
+    public var isVerticalIndicatorEnabled:Bool = true{
+        didSet{
+            collectionView.showsVerticalScrollIndicator = isVerticalIndicatorEnabled
+        }
+    }
+    
+    public var isHorizontalBounce:Bool = true{
+        didSet{
+            collectionView.alwaysBounceHorizontal = isHorizontalBounce
+        }
+    }
+    
+    public var isVerticalBounce:Bool = true{
+        didSet{
+            collectionView.alwaysBounceVertical = isVerticalBounce
+        }
+    }
+    
+    public var isBounce:Bool = true{
+        didSet{
+            collectionView.bounces = isBounce
+        }
+    }
 
     @IBInspectable public var isRepeat:Bool = false{
         didSet{

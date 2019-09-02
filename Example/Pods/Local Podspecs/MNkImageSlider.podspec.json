@@ -1,6 +1,6 @@
 {
   "name": "MNkImageSlider",
-  "version": "0.2.1.1",
+  "version": "0.31",
   "summary": "Image slider view for iOS",
   "description": "Custom created image slider with support image data or url",
   "homepage": "https://github.com/MnkGitBox/MNkImageSlider",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/MnkGitBox/MNkImageSlider.git",
-    "tag": "0.2.1.1"
+    "tag": "0.31"
   },
   "social_media_url": "https://twitter.com/malithnadeeshan",
   "platforms": {

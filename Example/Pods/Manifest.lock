@@ -1,5 +1,5 @@
 PODS:
-  - MNkImageSlider (0.2.1.1):
+  - MNkImageSlider (0.31):
     - MNkSliderEffectCollectionViewLayout
     - SDWebImage
   - MNkSliderEffectCollectionViewLayout (1.02)
@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  MNkImageSlider: 711559dc076b2fdcf46703bcec79c1f899b25069
+  MNkImageSlider: 5e72608f97ae3ccb7bfdb1975bde56d6390b97f4
   MNkSliderEffectCollectionViewLayout: dbb43ceb978674f04a2fe4e9a2f3cdd50713ee61
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
 

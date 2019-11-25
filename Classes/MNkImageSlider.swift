@@ -44,9 +44,9 @@ open class MNkImageSlider: UIView {
     public var indicatorAlign:IndicatorAlignment = .center{didSet{calculateIndicatorRect()}}
     public var isActiveIndicator:Bool{
         get{
-            return !indicator.isHidden
+            return !indicators.isHidden
         }set{
-            indicator.isHidden = !newValue
+            indicators.isHidden = !newValue
         }
     }
     
@@ -126,7 +126,7 @@ open class MNkImageSlider: UIView {
     /*...................
      Mark:- public views
      ....................*/
-    public var indicator:ItemIndicators!
+    public var indicators:ItemIndicators!
     
     /*....................................
      Mark:- private  parameters
@@ -168,8 +168,8 @@ open class MNkImageSlider: UIView {
         collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         
-        indicator = ItemIndicators()
-        indicator.datasouce = self
+        indicators = ItemIndicators()
+        indicators.datasouce = self
         
         animator = SliderAnimator()
         animator.slider = self
@@ -179,7 +179,7 @@ open class MNkImageSlider: UIView {
     
     private func insertAndLayoutViews(){
         addSubview(collectionView)
-        addSubview(indicator)
+        addSubview(indicators)
         
         NSLayoutConstraint.activate([collectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
                                      collectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
@@ -269,21 +269,21 @@ open class MNkImageSlider: UIView {
         guard isActiveIndicator,
         numberOfItems > 1
         else{
-            indicator.isHidden = true
+            indicators.isHidden = true
             return
         }
-        indicator.isHidden = false
+        indicators.isHidden = false
         
-        let itemWidth = (CGFloat(numberOfItems)  * indicator.indicatorWidth) + (CGFloat(numberOfItems - 1) * indicator.indicatorSpace)
-        let width = ((adjustIndicatorWidthAutomatically && (itemWidth < indicatorMaxWidth)) ? itemWidth : indicatorMaxWidth) + indicator.padding + indicator.padding
-        let height = indicator.indicatorWidth + indicator.padding + indicator.padding
+        let itemWidth = (CGFloat(numberOfItems)  * indicators.indicatorViewSize) + (CGFloat(numberOfItems - 1) * indicators.indicatorSpace)
+        let width = ((adjustIndicatorWidthAutomatically && (itemWidth < indicatorMaxWidth)) ? itemWidth : indicatorMaxWidth) + indicators.padding + indicators.padding
+        let height = indicators.indicatorViewSize + indicators.padding + indicators.padding
         let originX = (self.bounds.width - width) * indicatorAlign.positionFactor
         let originY = self.bounds.height - (height+indicatorBottomPadding)
-        indicator.frame = CGRect.init(origin: CGPoint.init(x: originX,
+        indicators.frame = CGRect.init(origin: CGPoint.init(x: originX,
                                                            y: originY),
                                       size: CGSize.init(width: width,
                                                         height:height))
-        indicator.reload()
+        indicators.reload()
     }
 }
 
@@ -318,6 +318,9 @@ extension MNkImageSlider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutP
     }
     
     public func sliderCollectionView(activeCell indexPath: IndexPath, in collectionView: UICollectionView, with layout: MNkSliderScrollEffectLayout) {
+        //set selected indicator for carousel layout
+        indicators.selectedIndex = indexPath.item
+        //return selected index delegate
         let cell = collectionView.cellForItem(at:indexPath) as? SliderCell
         delegate?.mnkSliderScrolled(toSlider: itemIndex(for: indexPath), of: cell)
     }

@@ -13,7 +13,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var imageSliderStoryBoard: MNkImageSlider!
     
-    let data =  [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile")]
+    let data =  [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog")]
     
     private var proImgSlider:MNkImageSlider!
     
@@ -43,18 +43,26 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
 //        imageSliderStoryBoard.isAnimate = true
 //        imageSliderStoryBoard.isRepeat = true
-//        imageSliderStoryBoard.delay = 2
-        imageSliderStoryBoard.indicator.selectedColor = .red
+        imageSliderStoryBoard.delay = 2
+        imageSliderStoryBoard.indicators.selectedColor = .red
         imageSliderStoryBoard.isActiveIndicator = true
         imageSliderStoryBoard.minScaleFactor = 0.2
+        imageSliderStoryBoard.isPagingEnabled = true
         
-        proImgSlider.indicator.selectedColor = .red
+        
+        proImgSlider.indicators.selectedColor = .red
         proImgSlider.isActiveIndicator = true
         proImgSlider.minScaleFactor  = 0.5
         proImgSlider.indicatorAlign = .right
         proImgSlider.indicatorBottomPadding = 0
         proImgSlider.adjustIndicatorWidthAutomatically = false
-        proImgSlider.indicator.padding = 4
+        proImgSlider.indicators.padding = 4
+        proImgSlider.indicators.indicatorViewSize = 6
+        proImgSlider.indicatorMaxWidth = 64
+        
+        let view = UIView()
+        view.backgroundColor = .green
+        proImgSlider.indicators.insetBackground(view)
     }
     
     

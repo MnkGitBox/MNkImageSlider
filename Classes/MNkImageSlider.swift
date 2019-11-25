@@ -269,10 +269,10 @@ open class MNkImageSlider: UIView {
         guard isActiveIndicator,
         numberOfItems > 1
         else{
-            indicators.isHidden = true
+            indicators.alpha = 0
             return
         }
-        indicators.isHidden = false
+        indicators.alpha = 1
         
         let itemWidth = (CGFloat(numberOfItems)  * indicators.indicatorViewSize) + (CGFloat(numberOfItems - 1) * indicators.indicatorSpace)
         let width = ((adjustIndicatorWidthAutomatically && (itemWidth < indicatorMaxWidth)) ? itemWidth : indicatorMaxWidth) + indicators.padding + indicators.padding

@@ -56,10 +56,7 @@ open class ItemIndicators:UIView{
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        collectionView.frame = CGRect.init(origin: CGPoint.init(x: padding,
-                                                                y: padding),
-                                           size: CGSize.init(width: self.bounds.width - padding - padding,
-                                                             height: self.bounds.height - padding - padding))
+        calculateCVFrame()
     }
     
     public override init(frame: CGRect) {
@@ -75,15 +72,22 @@ open class ItemIndicators:UIView{
     }
     
     func reload(){
+        calculateCVFrame()
         collectionView.reloadData()
     }
     
     private func setDisplayActiveIndicator(){
         let visibleCellIndexes = collectionView.indexPathsForVisibleItems.map{$0.item}
         let isVisibleActiveIndicator = !visibleCellIndexes.filter{$0==selectedIndex}.isEmpty
-        guard !isVisibleActiveIndicator else{return}
+        guard !isVisibleActiveIndicator,
+            !visibleCellIndexes.isEmpty else{return}
         collectionView.scrollToItem(at: IndexPath.init(row: selectedIndex, section: 0), at: .right, animated: true)
-        print(visibleCellIndexes,isVisibleActiveIndicator)
+    }
+    private func calculateCVFrame(){
+        collectionView.frame = CGRect.init(origin: CGPoint.init(x: padding,
+                                                                      y: padding),
+                                                 size: CGSize.init(width: self.bounds.width - padding - padding,
+                                                                   height: self.bounds.height - padding - padding))
     }
     
     public func insetBackground(_ view:UIView){

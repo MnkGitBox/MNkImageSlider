@@ -13,7 +13,8 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var imageSliderStoryBoard: MNkImageSlider!
     
-    let data =  [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog")]
+//    let data =  [#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "birds"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "reptile"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog"),#imageLiteral(resourceName: "dog")]
+    let data = [UIImage]()
     
     private var proImgSlider:MNkImageSlider!
     

@@ -9,6 +9,22 @@ import MNkSliderEffectCollectionViewLayout
 import UIKit
 
 open class MNkImageSlider: UIView {
+    public enum IndicatorAlignment{
+        case center
+        case left
+        case right
+        
+        var positionFactor:CGFloat{
+            switch self{
+            case .center:
+                return 0.5
+            case .left:
+                return 0
+            case .right:
+                return 1
+            }
+        }
+    }
     
     /*....................................
      Mark:- Public configurable paramters
@@ -18,74 +34,19 @@ open class MNkImageSlider: UIView {
             self.backgroundColor = sliderBackgroundColor
         }
     }
-    
-    //TODO:- need to set slider indicator inside scrollview and change this as uiedge inserts
-    public var indicatorBottomInsets:CGFloat = -8{
-        didSet{
-            indicatorBottomConstant?.constant = indicatorBottomInsets
-            layoutIfNeeded()
-        }
-    }
 
     public var delegate:MNkSliderDelegate?
     public var datasource:MNkSliderDataSource?
-    
-    public var isHorizontalIndicatorEnabled:Bool = true{
-        didSet{
-            collectionView.showsHorizontalScrollIndicator = isHorizontalIndicatorEnabled
-        }
-    }
-    
-    public var isVerticalIndicatorEnabled:Bool = true{
-        didSet{
-            collectionView.showsVerticalScrollIndicator = isVerticalIndicatorEnabled
-        }
-    }
-    
-    public var isHorizontalBounce:Bool = true{
-        didSet{
-            collectionView.alwaysBounceHorizontal = isHorizontalBounce
-        }
-    }
-    
-    public var isVerticalBounce:Bool = true{
-        didSet{
-            collectionView.alwaysBounceVertical = isVerticalBounce
-        }
-    }
-    
-    public var isBounce:Bool = true{
-        didSet{
-            collectionView.bounces = isBounce
-        }
-    }
 
-    @IBInspectable public var isRepeat:Bool = false{
-        didSet{
-            collectionView.reload()
-        }
-    }
-    
-    public var delay:Double = 1.0{
-        didSet{
-            animator.animationIntervals = delay
-            guard isAnimate else{return}
-            stopSlider()
-            playSlider()
-        }
-    }
-    
+    public var indicatorMaxWidth:CGFloat = 100{didSet{calculateIndicatorRect()}}
+    public var adjustIndicatorWidthAutomatically:Bool = true{didSet{calculateIndicatorRect()}}
+    public var indicatorBottomPadding:CGFloat = 10{didSet{calculateIndicatorRect()}}
+    public var indicatorAlign:IndicatorAlignment = .center{didSet{calculateIndicatorRect()}}
     public var isActiveIndicator:Bool{
         get{
             return !indicator.isHidden
         }set{
             indicator.isHidden = !newValue
-        }
-    }
-    
-    public var repeatFactor:Int = 100{
-        didSet{
-            collectionView.reload()
         }
     }
     
@@ -95,36 +56,24 @@ open class MNkImageSlider: UIView {
         }
     }
     
-    public var interItemSpace:CGFloat = 0{
+    @IBInspectable public var isRepeat:Bool = false{
         didSet{
-            layout.interItemSpace = interItemSpace
+            collectionView.reload()
         }
     }
-    
-    public var minScaleFactor:CGFloat = 1.0{
+    public var delay:Double = 1.0{
         didSet{
-            layout.minScaleFactor = minScaleFactor
+            animator.animationIntervals = delay
+            guard isAnimate else{return}
+            stopSlider()
+            playSlider()
         }
     }
-    
-    public var minAphaFactor:CGFloat = 1.0{
+    public var repeatFactor:Int = 100{
         didSet{
-            layout.minAlphaFactor = minAphaFactor
+            collectionView.reload()
         }
     }
-    
-    public var activePosition:ActiveCellDisplayPosition = .left{
-        didSet{
-            layout.displayPosition = activePosition
-        }
-    }
-    
-    public var isPagingEnabled:Bool = true{
-        didSet{
-            layout.isPaginEnabled = isPagingEnabled
-        }
-    }
-    
     public var isAnimate:Bool = false{
         didSet{
             guard isAnimate else{
@@ -132,6 +81,45 @@ open class MNkImageSlider: UIView {
                 return
             }
             playSlider()
+        }
+    }
+    
+    //MARK: - CUSTOM CAROUSEL LAYOUT CONFIG PULIC VAR
+    ///Space between two carousel cell
+    public var interItemSpace:CGFloat = 0{
+        didSet{
+            layout.interItemSpace = interItemSpace
+        }
+    }
+    ///Minimum scale factor carousel will display
+    public var minScaleFactor:CGFloat = 1.0{
+        didSet{
+            layout.minScaleFactor = minScaleFactor
+        }
+    }
+    ///Minimum alpha factor for carousel cell
+    public var minAphaFactor:CGFloat = 1.0{
+        didSet{
+            layout.minAlphaFactor = minAphaFactor
+        }
+    }
+    ///Carousel cell active position. Active cell will display in actual size and alpha of 1.
+    public var activePosition:ActiveCellDisplayPosition = .left{
+        didSet{
+            layout.displayPosition = activePosition
+        }
+    }
+    ///Enable paging for carousel cells.
+    public var carouselPaginEnabled:Bool = true{
+        didSet{
+            layout.isPaginEnabled = carouselPaginEnabled
+        }
+    }
+    
+    ///Enable paging for default slider
+    public var isPagingEnabled:Bool = false{
+        didSet{
+            collectionView.isPagingEnabled = isPagingEnabled
         }
     }
     
@@ -147,24 +135,17 @@ open class MNkImageSlider: UIView {
         return "sliderCell"
     }
     var collectionView:UICollectionView!
-    
     var layout:MNkSliderScrollEffectLayout!
-    
     private var currImgIndex:Int = 0
-    
     private var indicatorBottomConstant:NSLayoutConstraint?
-
     private var sliderDirection:SliderDirection = .forward
-    
     private var animator:SliderAnimator!
-    
     private var numberOfItems:Int{
         guard let items = datasource?.mnkSliderNumberOfItems(in: self) else{
             return 0
         }
         return items
     }
-    
     
     
     /*.......................................
@@ -176,7 +157,7 @@ open class MNkImageSlider: UIView {
         layout.interItemSpace = interItemSpace
         layout.minScaleFactor = minScaleFactor
         layout.displayPosition = activePosition
-        layout.isPaginEnabled = isPagingEnabled
+        layout.isPaginEnabled = carouselPaginEnabled
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
@@ -184,9 +165,11 @@ open class MNkImageSlider: UIView {
         collectionView.sliderScrollEffectDelegate = self
         collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
         
-        indicator = ItemIndicators(numberOfItems)
-        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator = ItemIndicators()
+        indicator.datasouce = self
         
         animator = SliderAnimator()
         animator.slider = self
@@ -202,10 +185,6 @@ open class MNkImageSlider: UIView {
                                      collectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                                      collectionView.topAnchor.constraint(equalTo: self.topAnchor),
                                      collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
-        
-        indicatorBottomConstant = indicator.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: indicatorBottomInsets)
-        indicatorBottomConstant?.isActive = true
-        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: centerXAnchor)])
     }
     private func config(){
         collectionView.register(SliderCell.self, forCellWithReuseIdentifier: sliderCell)
@@ -239,6 +218,11 @@ open class MNkImageSlider: UIView {
     }
     
 
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        calculateIndicatorRect()
+    }
+    
     /*.........................................
      Mark:- Animation controll func going here
      .........................................*/
@@ -254,11 +238,8 @@ open class MNkImageSlider: UIView {
      Mark:- Animation controll func going here
      .........................................*/
     public func reloadData(){
-        collectionView.reload()
-        
-        guard isActiveIndicator else{return}
-        indicator.items = numberOfItems
-        indicator.activeIndex = currImgIndex
+        calculateIndicatorRect()
+        collectionView.reloadData()
     }
 
     /*..................................................................................
@@ -283,6 +264,27 @@ open class MNkImageSlider: UIView {
         return cell
     }
  
+    //MARK:- CALCULATE INIDICATOR POSITION AND SIZE ACORDING USER CONFIG
+    private func calculateIndicatorRect(){
+        guard isActiveIndicator,
+        numberOfItems > 1
+        else{
+            indicator.isHidden = true
+            return
+        }
+        indicator.isHidden = false
+        
+        let itemWidth = (CGFloat(numberOfItems)  * indicator.indicatorWidth) + (CGFloat(numberOfItems - 1) * indicator.indicatorSpace)
+        let width = ((adjustIndicatorWidthAutomatically && (itemWidth < indicatorMaxWidth)) ? itemWidth : indicatorMaxWidth) + indicator.padding + indicator.padding
+        let height = indicator.indicatorWidth + indicator.padding + indicator.padding
+        let originX = (self.bounds.width - width) * indicatorAlign.positionFactor
+        let originY = self.bounds.height - (height+indicatorBottomPadding)
+        indicator.frame = CGRect.init(origin: CGPoint.init(x: originX,
+                                                           y: originY),
+                                      size: CGSize.init(width: width,
+                                                        height:height))
+        indicator.reload()
+    }
 }
 
 /*...................................................
@@ -346,4 +348,11 @@ extension MNkImageSlider:UICollectionViewDataSource,MNkSliderScrollEffectLayoutP
         playSlider()
     }
   
+}
+
+//MARK: - INDICATOR DATASOURCE IMPLIMENTATION
+extension MNkImageSlider:ItemIndicatorDatasouce{
+    func numberOfItemsForIndicator() -> Int {
+        return numberOfItems
+    }
 }

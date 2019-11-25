@@ -6,6 +6,9 @@
 //
 
 import Foundation
+protocol ItemIndicatorDatasouce:class{
+    func numberOfItemsForIndicator()->Int
+}
 open class ItemIndicators:UIView{
     
     /*....................................
@@ -13,230 +16,100 @@ open class ItemIndicators:UIView{
      .....................................*/
     public var selectedColor:UIColor = .black{
         didSet{
-            reloadData()
+//            reloadData()
         }
     }
     public var unSelectedColor:UIColor = .white{
         didSet{
-            reloadData()
+//            reloadData()
         }
     }
     public var isVisibleBackground:Bool = true{
         didSet{
-            backgroundBlurView.isHidden = !isVisibleBackground
+//            backgroundBlurView.isHidden = !isVisibleBackground
         }
     }
+    public var padding:CGFloat = 2
     
     
-    
-    
-    
-    
-    
-    
-    /*...............................................
-     Mark:- private and internal views and parameters
-     ................................................*/
-    var items:Int{
-        willSet{
-            guard oldItems == newValue else{
-                createIndicators(for: newValue)
-                return
-            }
-            reloadData()
-        }
-        didSet{
-            oldItems = items
-        }
+    weak var datasouce:ItemIndicatorDatasouce?
+    var indicatorWidth:CGFloat{
+        return 5
+    }
+    var indicatorSpace:CGFloat{
+        return 2
     }
     
-    var activeIndex:Int = 0{
-        didSet{
-            setActiveIndex()
-        }
+    private var cellID:String{
+        return "indicator_cell_id"
     }
+    private var collectionView:UICollectionView!
     
-    private var lastActiveIndex:Int?
-    private var oldItems:Int = 0
-    
-    private var scrollView:UIScrollView!
-    private var stackView:UIStackView!
-    private var container:UIView!
-    private var backgroundBlurView:UIVisualEffectView!
-    
-    private var indicators = [Indicator]()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*.......................................
-     Mark:- Create layout and configure views
-     .......................................*/
     private func createViews(){
-        
-        clipsToBounds = true
-        layer.cornerRadius = 3
-        
-        stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.distribution = .fill
-        stackView.alignment = .fill
-        stackView.spacing = 4
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        
-        container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        
-        let blurEffectView = UIBlurEffect(style: UIBlurEffectStyle.light)
-        backgroundBlurView = UIVisualEffectView(effect: blurEffectView)
-        backgroundBlurView.translatesAutoresizingMaskIntoConstraints = false
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = indicatorSpace
+        layout.minimumInteritemSpacing = indicatorSpace
+        collectionView = UICollectionView.init(frame: .zero, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.register(InidicatorCell.self, forCellWithReuseIdentifier: cellID)
+        collectionView.backgroundColor = .clear
+    }
+    private func insertAndLayoutViews(){
+        addSubview(collectionView)
     }
     
-    private func insertAndLayoutSubviews(){
-        addSubview(backgroundBlurView)
-        addSubview(container)
-        container.addSubview(stackView)
-        
-        NSLayoutConstraint.activate([backgroundBlurView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                                     backgroundBlurView.trailingAnchor.constraint(equalTo:trailingAnchor),
-                                     backgroundBlurView.topAnchor.constraint(equalTo: topAnchor),
-                                     backgroundBlurView.bottomAnchor.constraint(equalTo:bottomAnchor)])
-        
-        NSLayoutConstraint.activate([container.leadingAnchor.constraint(equalTo: leadingAnchor,
-                                                                        constant: 4),
-                                     container.trailingAnchor.constraint(equalTo: trailingAnchor,
-                                                                         constant: -4),
-                                     container.topAnchor.constraint(equalTo: topAnchor,
-                                                                    constant:4),
-                                     container.bottomAnchor.constraint(equalTo: bottomAnchor,
-                                                                       constant: -4)])
-        
-        NSLayoutConstraint.activate([stackView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                                     stackView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-                                     stackView.topAnchor.constraint(equalTo: container.topAnchor),
-                                     stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)])
-        
-        
-        
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        collectionView.frame = CGRect.init(origin: CGPoint.init(x: padding,
+                                                                y: padding),
+                                           size: CGSize.init(width: self.bounds.width - padding - padding,
+                                                             height: self.bounds.height - padding - padding))
     }
     
-    
-    init(_ items:Int = 0) {
-        self.items = items
-        super.init(frame: .zero)
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .red
         createViews()
-        insertAndLayoutSubviews()
-        backgroundColor = .clear
+        insertAndLayoutViews()
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*.............................................
-     Mark:- Update indicator view func going here
-     ............................................*/
-    private func reloadData(){
-        updateIndicators()
-        setDefaultIndicators()
-        setActiveIndex()
+    func reload(){
+        collectionView.reloadData()
+    }
+}
+
+//MARK: - COLLECTION VIEW DELEGATE AND DATASOURCE IMPLIMENTATION
+extension ItemIndicators:UICollectionViewDataSource,
+UICollectionViewDelegateFlowLayout{
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return datasouce?.numberOfItemsForIndicator() ?? 0
     }
     
-    private func createIndicators(for noItems:Int){
-        
-        for tag in 0..<noItems{
-            let indicator = Indicator(tag)
-            indicators.append(indicator)
-            stackView.addArrangedSubview(indicator)
-        }
-        
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath)
+        cell.backgroundColor = .white
+        cell.layer.cornerRadius = indicatorWidth / 2
+        return cell
     }
     
-    private func updateIndicators(){
-        guard items != indicators.count else{return}
-        
-        guard items > indicators.count else{
-            removeIndicators()
-            return
-        }
-        addIndicators()
-    }
-    
-    private func removeIndicators(){
-        let removeItems = indicators.count - items
-        for _ in 0..<removeItems{
-            let indicator = indicators.removeLast()
-            indicator.removeFromSuperview()
-        }
-    }
-    
-    private func addIndicators(){
-        let itemToAdd = items - indicators.count
-        for _ in 0..<itemToAdd{
-            let indicator = Indicator()
-            indicators.append(indicator)
-            stackView.addArrangedSubview(indicator)
-        }
-    }
-    
-    private func setDefaultIndicators(){
-        for (index,indicator) in indicators.enumerated(){
-            indicator.tag = index
-            indicator.backgroundColor = unSelectedColor
-        }
-    }
-    
-    
-    private func setActiveIndex(){
-        guard !indicators.isEmpty else{return}
-        guard let last = lastActiveIndex,
-            last != activeIndex
-            else{
-                let indicator =  indicators[activeIndex]
-                selectIndicator(true, of: indicator, isAnimate: false)
-                lastActiveIndex = activeIndex
-                return
-        }
-        let unselectIndi = indicators[last]
-        let selectIndi = indicators[activeIndex]
-        selectIndicator(false, of: unselectIndi)
-        selectIndicator(true, of: selectIndi)
-        
-        lastActiveIndex = activeIndex
-    }
-    
-    private func selectIndicator(_ isSelect:Bool,of indicatorView:UIView,isAnimate animate:Bool = true){
-        
-        let transform = isSelect ? CGAffineTransform(scaleX: 1.1, y: 1.1) : .identity
-        let color = isSelect ? selectedColor : unSelectedColor
-        let duration:TimeInterval = animate ? 0.4 : 0.0
-        
-        UIView.animate(withDuration: duration) {
-            indicatorView.backgroundColor = color
-            indicatorView.transform = transform
-        }
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        guard let numberOfItems = datasouce?.numberOfItemsForIndicator() else{return .zero}
+
+        let spaceFreeWidth = collectionView.bounds.width - (indicatorSpace * CGFloat(numberOfItems - 1))
+        let calculatedWidth = spaceFreeWidth / CGFloat(numberOfItems)
+        let width = indicatorWidth < calculatedWidth ? calculatedWidth : indicatorWidth
+        return CGSize.init(width: width,
+                           height: collectionView.bounds.height)
     }
     
 }
 
+class InidicatorCell:UICollectionViewCell{}

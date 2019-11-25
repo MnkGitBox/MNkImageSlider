@@ -21,11 +21,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         imageSliderStoryBoard.register(slider: SliderSample.self, with: "test")
         imageSliderStoryBoard.datasource = self
-//        imageSliderStoryBoard.delegate = sel
         imageSliderStoryBoard.slideActivePosition = .middle
         
         
-        proImgSlider = MNkImageSlider.init(frame: .zero, .backward)
+        proImgSlider = MNkImageSlider.init(frame: .zero, .forward)
         proImgSlider.register(slider: SliderSample.self, with: "test")
         proImgSlider.datasource = self
         proImgSlider.delegate = self
@@ -42,19 +41,20 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        imageSliderStoryBoard.isAnimate = true
-        imageSliderStoryBoard.isRepeat = true
-        imageSliderStoryBoard.delay = 2
+//        imageSliderStoryBoard.isAnimate = true
+//        imageSliderStoryBoard.isRepeat = true
+//        imageSliderStoryBoard.delay = 2
         imageSliderStoryBoard.indicator.selectedColor = .red
         imageSliderStoryBoard.isActiveIndicator = true
         imageSliderStoryBoard.minScaleFactor = 0.2
         
-//        proImgSlider.playSlider()
-        proImgSlider.isRepeat = true
-//        proImgSlider.delay = 2
         proImgSlider.indicator.selectedColor = .red
         proImgSlider.isActiveIndicator = true
-        proImgSlider.repeatFactor = 2
+        proImgSlider.minScaleFactor  = 0.5
+        proImgSlider.indicatorAlign = .right
+        proImgSlider.indicatorBottomPadding = 0
+        proImgSlider.adjustIndicatorWidthAutomatically = false
+        proImgSlider.indicator.padding = 4
     }
     
     
@@ -92,8 +92,6 @@ extension ViewController:MNkSliderDataSource,MNkSliderDelegate{
 
 
 class SliderSample:SliderCell{
-    
-    
     var label:UILabel!
     
     private func createViews(){

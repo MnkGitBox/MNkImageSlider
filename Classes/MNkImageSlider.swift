@@ -135,7 +135,7 @@ open class MNkImageSlider: UIView {
         return "sliderCell"
     }
     var collectionView:UICollectionView!
-    var layout:MNkSliderScrollEffectLayout!
+    public var layout:MNkSliderScrollEffectLayout!
     private var currImgIndex:Int = 0
     private var indicatorBottomConstant:NSLayoutConstraint?
     private var sliderDirection:SliderDirection = .forward

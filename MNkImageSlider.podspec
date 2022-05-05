@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MNkImageSlider'
-  s.version          = '1.1.1'
+  s.version          = '1.1.2'
   s.summary          = 'Image slider view for iOS'
 
 # This description is used to generate tags and improve search results.
